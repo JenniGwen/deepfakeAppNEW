@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Analysis from "./Analysis";
 import Statistics from "./Statistics";
+import Settings from "./Settings";
 
 const NAV_ITEMS = [
   { icon: "⊞", label: "Dashboard", path: "/" },
@@ -61,6 +62,7 @@ export function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/stats" element={<Analysis />} />
             <Route path="/charts" element={<Statistics />} />
+            <Route path="/settings" element={<Settings/>} />   
           </Routes>
         </main>
 

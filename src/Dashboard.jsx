@@ -34,7 +34,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold">IsItFake?</h1>
+            <h1 className="text-3xl font-bold">IsItFake?</h1>
             <p className="text-slate-500 text-sm mt-1">
               Advanced AI-powered media verification and analysis
             </p>
