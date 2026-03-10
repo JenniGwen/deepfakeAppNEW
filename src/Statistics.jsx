@@ -1,30 +1,30 @@
-import { BarChart3, TrendingUp, CheckCircle, AlertTriangle } from 'lucide-react'
+import { BarChart3, TrendingUp, CheckCircle, AlertTriangle, TrendingUpIcon } from 'lucide-react'
 
-const barChart = () => {
-    return <BarChart3 color='text-blue-400' size={8}/>;
-};
+// const barChart = () => {
+//     return <BarChart3 color='text-blue-400' size={8}/>;
+// };
 
-const TrendingUpScanCard = () => (
-    <TrendingUp color='text-green-400'size={3}/>
-);
+// const TrendingUpScanCard = () => (
+//     <TrendingUp color='text-green-400'size={3}/>
+// );
 
-const centangCircle = () => (
-    <CheckCircle color='text-green-400' size={5}/>
-);
+// const centangCircle = () => (
+//     <CheckCircle color='text-green-400' size={5}/>
+// );
 
-const warningTriangle = () => (
-    <AlertTriangle color='text-red-400' size={5}/>
-);
+// const warningTriangle = () => (
+//     <AlertTriangle color='text-red-400' size={5}/>
+// );
 
-const AccuracyCard = () => (
-    <TrendingUp color='text-cyan-400' size={5}/>
-);
+// const AccuracyCard = () => (
+//     <TrendingUp color='text-cyan-400' size={5}/>
+// );
 
 const STATS = [
-  { value: "1,247", label: "Videos Analyzed" , icon: barChart, iconColor: "text-blue-400"},
-  { value: "98.4%", label: "Accuracy" },
-  { value: "892", label: "Real Videos" },
-  { value: "335", label: "Fake Videos"}
+  { value: "1,247", label: "Videos Analyzed" , icon: BarChart3, iconColor: "text-blue-400", text: "12% this week"},
+  { value: "98.4%", label: "Accuracy", icon: CheckCircle, iconColor: "text-green-400", text: "71.5% of total" },
+  { value: "892", label: "Real Videos", icon: AlertTriangle, iconColor: "text-red-400", text: "28.5% of total" },
+  { value: "335", label: "Fake Videos", icon: TrendingUpIcon, iconColor: "text-blue-400", text: "Industry leading"}
 ];
 
 export default function Statistics(){
@@ -41,13 +41,16 @@ export default function Statistics(){
 
                 {/* The 4 top cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {STATS.map(({label, value, icon, iconColor}) =>(
+                    {STATS.map(({label, value, icon:Icon, iconColor, text}) =>(
                         <div key={label} className="bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5">
                             <div className="flex gap-3 items-center">
-                                {icon && <span className={`text-2xl rounded-lg bg-green border border-white/30 rounded-sm ${iconColor}`}>{icon}</span>}
+                                <div className='p-2 bg-white/5 rounded-lg border border-white/10'>
+                                    {Icon && <Icon className={iconColor} size={20} />}
+                                </div>
                                 <span className="text-slate-500 text-sm">{label}</span>
                             </div>
                             <div className={`text-3xl font-bold pt-3`}>{value}</div>
+                            <div className={'text-xs text-slate-400 font-sans pt-1 pl'}>{text}</div>
                         </div>
 
                     ))}
