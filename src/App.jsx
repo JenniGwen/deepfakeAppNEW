@@ -3,12 +3,13 @@ import Dashboard from "./Dashboard";
 import Analysis from "./Analysis";
 import Statistics from "./Statistics";
 import Settings from "./Settings";
+import { SettingsIcon, HomeIcon, ActivityIcon, BarChart3 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { icon: "⊞", label: "Dashboard", path: "/" },
-  { icon: "〜", label: "Analysis", path: "/stats" }, // Linked to your 'Statistics' import
-  { icon: "▦", label: "Statistics", path: "/charts" },
-  { icon: "⚙", label: "Settings", path: "/settings" },
+  { icon: HomeIcon, label: "Dashboard", path: "/" },
+  { icon: ActivityIcon, label: "Analysis", path: "/stats" }, // Linked to your 'Statistics' import
+  { icon: BarChart3, label: "Statistics", path: "/charts" },
+  { icon: SettingsIcon, label: "Settings", path: "/settings" },
 ];
 
 export function App() {
@@ -28,7 +29,7 @@ export function App() {
           </div>
 
           <nav className="flex flex-col gap-1 flex-1">
-            {NAV_ITEMS.map(({ icon, label, path }) => (
+            {NAV_ITEMS.map(({ icon:Icon, label, path }) => (
               // 2. We use NavLink so React knows which page is 'Active'
               <NavLink
                 key={label}
@@ -40,7 +41,7 @@ export function App() {
                     : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"}`
                 }
               >
-                <span className="text-base">{icon}</span>
+                <div className="text-base">{Icon && <Icon size={20}/>}</div>
                 {label}
               </NavLink>
             ))}
