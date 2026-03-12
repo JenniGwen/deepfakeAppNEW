@@ -1,5 +1,25 @@
 import { BarChart3, TrendingUp, CheckCircle, AlertTriangle, TrendingUpIcon } from 'lucide-react'
 
+const PERFORMANCE_METRICS = [
+  { 
+    label: "Processing Speed", 
+    value: "2.8s avg", 
+    width: "75%", 
+    color: "bg-gradient-to-r from-blue-500 to-cyan-400" 
+  },
+  { 
+    label: "Detection Rate", 
+    value: "98.4%", 
+    width: "98%", 
+    color: "bg-gradient-to-r from-green-400 to-emerald-400" 
+  },
+  { 
+    label: "System Uptime", 
+    value: "99.9%", 
+    width: "100%", 
+    color: "bg-gradient-to-r from-cyan-400 to-blue-500" 
+  }
+];
 
 const MIDDLEPART = [
     { label: "Detection Trends", icon: BarChart3 },
@@ -43,19 +63,41 @@ export default function Statistics(){
                     ))}
                 </div>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4'>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4'>
                     {MIDDLEPART.map(({ label, icon:Icon }) => (
                         <div key={label} className='bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5'>
-                            <div>
+                            <div className='text-slate-400 text-lg font-bold pb-3'>{label}</div>
+                            <div className='flex flex-col border-3 border-[#1e2538] border-dashed rounded-2xl px-6 py-20 items-center justify-center'>
                                 {Icon && <Icon className="text-slate-400" size={50}/>}
+                                <p className='pt-3 text-sm text-slate-700'>Chart Visualisation Would Be Displayed Here</p>
                             </div>
-
-
                         </div>
-
-
                     ))}
+                </div>
+                <div className="bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5">
+                    <h className='text-slate-400 font-bold'>Performance Matrix</h>
+                    <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8'>
+                        {PERFORMANCE_METRICS.map(({label, value, width, color}) => (
+                            <div key={label} className='flex flex-col gap-3'>
+                                <div className="flex justify-between items-center text-sm pt-3">
+                                    <span className="text-slate-400 font-medium">{label}</span>
+                                    <span className="text-white font-bold">{value}</span>
+                                    </div>
 
+                                    {/* The Progress Bar */}
+                                    {/* 1. The Track (Dark background) */}
+                                    <div className="w-full h-2.5 bg-[#1e2538] rounded-full overflow-hidden">
+                                    {/* 2. The Fill (Colored bar using inline style for dynamic width) */}
+                                    <div 
+                                        className={`h-full rounded-full ${color}`} 
+                                        style={{ width: width }} 
+                                    ></div>
+                                    </div>
+
+                            </div>
+                        ))}
+                    </div>
+                    
 
                 </div>
             </main>
