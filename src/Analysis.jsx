@@ -1,4 +1,4 @@
-
+import {ActivityIcon} from "lucide-react"
 
 const STATS = [
   { label: "Today's Scans", value: "47", accent: "text-white", icon: "↗", iconColor: "text-green-400" },
@@ -22,7 +22,7 @@ export default function Analysis() {
       <main className="flex-1 flex flex-col gap-6 px-10 py-8">
         {/* Header */}
         <header className="flex items-center gap-4 pb-4 border-b border-[#1e2538]">
-          <span className="text-cyan-400 text-3xl">〜</span>
+          <span className="text-cyan-400 text-3xl"><ActivityIcon size={30}/></span>
           <div>
             <h1 className="text-3xl font-bold">Analysis Overview</h1>
             <p className="text-slate-500 text-sm mt-1">Detailed insights and recent detections</p>

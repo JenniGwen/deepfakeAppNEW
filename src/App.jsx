@@ -20,12 +20,16 @@ export function App() {
         
         {/* sidebar */}
         <aside className="w-60 bg-[#161b27] flex flex-col px-4 py-6 gap-8 border-r border-[#1e2538] shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🛡</span>
-            <div>
-              <div className="font-bold text-sm leading-snug">IsItFake?</div>
-              <div className="text-xs text-slate-500 mt-0.5">Security Analytics</div>
-            </div>
+          <div className="flex items-center justify-center px-2 mb-2">
+            <img 
+              src="/Group 5.svg" 
+              alt="IsItFake Logo" 
+              // w-44 keeps it nicely contained, h-auto keeps its natural shape
+              className="w-44 h-auto object-contain drop-shadow-lg" 
+            />
+            {/* <span className="text-[10px] text-slate-500 font-medium tracking-wide">
+              Deepfake Verification
+            </span> */}
           </div>
 
           <nav className="flex flex-col gap-1 flex-1">

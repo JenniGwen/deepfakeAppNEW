@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SettingsIcon } from "lucide-react"
 
 function Toggle({ enabled, onToggle }) {
   return (
@@ -33,7 +34,7 @@ export default function Settings() {
       <main className="flex-1 flex flex-col gap-6 px-10 py-8 overflow-y-auto">
         {/* Header */}
         <header className="flex items-center gap-4 pb-4 border-b border-[#1e2538]">
-          <span className="text-cyan-400 text-2xl">⚙</span>
+          <span className="text-cyan-400 text-2xl"><SettingsIcon size={30}/></span>
           <div>
             <h1 className="text-3xl font-bold">Settings</h1>
             <p className="text-slate-500 text-sm mt-1">Configure your deepfake detection preferences</p>
