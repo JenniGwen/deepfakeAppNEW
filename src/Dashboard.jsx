@@ -75,21 +75,26 @@ export default function Dashboard() {
               Supported formats: MP4, MOV, AVI, WebM
             </p>
           </div>
-
-          {/* Run Button */}
-          <div className="flex justify-center mt-6">
-            <button 
-            onClick={() => setIsScanning(true)}
-            disabled = {isScanning}
-            className={`bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold px-12 py-3 rounded-xl transition-all cursor-pointer"
-            ${isScanning 
-              ? "bg-slate-700 text-slate-400 cursor-not-allowed scale-95"
-              : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white active:scale-95"
-
-            }`}>
-              {isScanning ? "Scanning... Please wait" : "Run Analysis"}
-            </button>
-          </div>
+              {/* Run Button */}
+            <div className="flex justify-center mt-6">
+              <button 
+                onClick={() => setIsScanning(true)}
+                // 1. The Physical Lock: Disable if currently scanning OR if no file exists
+                disabled={isScanning || !fileName} 
+                
+                // 2. Base classes that NEVER change
+                className={`font-semibold px-12 py-3 rounded-xl transition-all duration-300
+                  ${(isScanning || !fileName) 
+                    // 3a. DISABLED LOOK: Gray, faded, and not-allowed cursor
+                    ? "bg-slate-800 text-slate-500 cursor-not-allowed" 
+                    
+                    // 3b. ACTIVE LOOK: The beautiful gradient, shadow, and click animation
+                    : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white cursor-pointer active:scale-95 shadow-lg shadow-cyan-500/20" 
+                  }`}
+              >
+                {isScanning ? "Scanning... Please wait" : "Run Analysis"}
+              </button>
+            </div>
         </section>
 
         {/* Stats */}
