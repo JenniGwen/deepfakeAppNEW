@@ -1,24 +1,11 @@
 import { BarChart3, TrendingUp, CheckCircle, AlertTriangle, TrendingUpIcon } from 'lucide-react'
 
-// const barChart = () => {
-//     return <BarChart3 color='text-blue-400' size={8}/>;
-// };
 
-// const TrendingUpScanCard = () => (
-//     <TrendingUp color='text-green-400'size={3}/>
-// );
+const MIDDLEPART = [
+    { label: "Detection Trends", icon: BarChart3 },
+    { label: "Confidence Distribution", icon: BarChart3}
+];
 
-// const centangCircle = () => (
-//     <CheckCircle color='text-green-400' size={5}/>
-// );
-
-// const warningTriangle = () => (
-//     <AlertTriangle color='text-red-400' size={5}/>
-// );
-
-// const AccuracyCard = () => (
-//     <TrendingUp color='text-cyan-400' size={5}/>
-// );
 
 const STATS = [
   { value: "1,247", label: "Videos Analyzed" , icon: BarChart3, iconColor: "text-blue-400", text: "12% this week"},
@@ -54,6 +41,22 @@ export default function Statistics(){
                         </div>
 
                     ))}
+                </div>
+
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4'>
+                    {MIDDLEPART.map(({ label, icon:Icon }) => (
+                        <div key={label} className='bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5'>
+                            <div>
+                                {Icon && <Icon className="text-slate-400" size={50}/>}
+                            </div>
+
+
+                        </div>
+
+
+                    ))}
+
+
                 </div>
             </main>
 
