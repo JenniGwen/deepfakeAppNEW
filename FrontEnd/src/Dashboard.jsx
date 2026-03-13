@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { Upload } from "lucide-react"
 
 
 const STATS = [
@@ -63,16 +63,18 @@ export default function Dashboard() {
             <input
               id="fileInput"
               type="file"
-              accept="video/mp4,video/mov,video/avi,video/webm"
+              accept="image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={handleFileChange}
             />
-            <div className="text-4xl text-slate-400 mb-4">⬆</div>
+            <div className="flex text-4xl text-slate-400 mb-4 justify-center items-center">
+              <Upload size={50}/>
+            </div>
             <p className="font-semibold text-sm">
               {fileName ?? "Drop your video here or click to browse"}
             </p>
             <p className="text-slate-500 text-xs mt-2">
-              Supported formats: MP4, MOV, AVI, WebM
+              Supported formats: JPG, PNG, WebP
             </p>
           </div>
               {/* Run Button */}
