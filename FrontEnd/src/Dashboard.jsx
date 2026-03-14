@@ -12,17 +12,28 @@ export default function Dashboard() {
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [rawFile, setRawFile] = useState(null);
+  const [urlImage, setUrlImage] = useState(null);
 
   const handleDrop = (e) => {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) setFileName(file.name);
+    if (file) {
+      setFileName(file);
+      setRawFile(file);
+      setUrlImage(URL.createObjectURL(file))
+    }
+      
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) setFileName(file.name);
+    if (file) {
+      setFileName(file);
+      setRawFile(file);
+      setUrlImage(URL.createObjectURL(file))
+    }
   };
 
   return (
