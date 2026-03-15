@@ -20,7 +20,7 @@ export default function Dashboard() {
     setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) {
-      setFileName(file);
+      setFileName(file.name);
       setRawFile(file);
       setUrlImage(URL.createObjectURL(file))
     }
@@ -30,7 +30,7 @@ export default function Dashboard() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFileName(file);
+      setFileName(file.name);
       setRawFile(file);
       setUrlImage(URL.createObjectURL(file))
     }
@@ -78,15 +78,28 @@ export default function Dashboard() {
               className="hidden"
               onChange={handleFileChange}
             />
-            <div className="flex text-4xl text-slate-400 mb-4 justify-center items-center">
+            {urlImage ? (
+              <>
+              <img src={urlImage} 
+              alt="Uploaded preview"
+              className="max-h-64 object-contain mx-auto rounded-lg"/>
+              <p className="text-slate-200 text-xs mt-2">{fileName}</p>
+              </>
+              
+            ) : (
+              <>
+              <div className="flex text-4xl text-slate-400 mb-4 justify-center items-center">
               <Upload size={50}/>
-            </div>
-            <p className="font-semibold text-sm">
-              {fileName ?? "Drop your video here or click to browse"}
-            </p>
+              </div>
+              <p className="font-semibold text-sm">
+                {fileName ?? "Drop your video here or click to browse"}
+              </p>
+              </>
+            )}
             <p className="text-slate-500 text-xs mt-2">
-              Supported formats: JPG, PNG, WebP
+                Supported formats: JPG, PNG, WebP
             </p>
+            
           </div>
               {/* Run Button */}
             <div className="flex justify-center mt-6">
