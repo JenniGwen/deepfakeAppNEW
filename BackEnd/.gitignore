@@ -1,0 +1,4 @@
+__pycache__/
+
+# Apple Mac's Hidden Desktop Files
+.DS_Store

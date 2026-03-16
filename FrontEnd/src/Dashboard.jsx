@@ -36,6 +36,26 @@ export default function Dashboard() {
     }
   };
 
+  const handleScan = async () => {
+    setIsScanning(true);
+    const sendData = new FormData();
+    sendData.append("file", rawFile)
+    try {
+
+      const response = await fetch("http://127.0.0.1:5001/api/scan", {
+      method: "POST",
+      body: sendData,
+      });
+
+      const result = await response.json();
+      console.log("The AI Factory says:", result);
+    } catch (error) {
+      console.error("The delivery crashed:", error);
+    }finally{
+      setIsScanning(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
       {/* Sidebar */}
@@ -104,7 +124,7 @@ export default function Dashboard() {
               {/* Run Button */}
             <div className="flex justify-center mt-6">
               <button 
-                onClick={() => setIsScanning(true)}
+                onClick={handleScan}
                 // 1. The Physical Lock: Disable if currently scanning OR if no file exists
                 disabled={isScanning || !fileName} 
                 
