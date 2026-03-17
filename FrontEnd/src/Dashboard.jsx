@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Upload } from "lucide-react"
+import { useNavigate } from 'react-router-dom';
 
 
 const STATS = [
@@ -36,6 +37,8 @@ export default function Dashboard() {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleScan = async () => {
     setIsScanning(true);
     const sendData = new FormData();
@@ -48,7 +51,36 @@ export default function Dashboard() {
       });
 
       const result = await response.json();
-      console.log("The AI Factory says:", result);
+      if (result.status === "success") {
+          // 1. Generate the timestamp for right now
+          const now = new Date();
+          const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+          // 2. Package the new scan into a neat object
+          const newScan = {
+              file: rawFile.name,
+              result: result.result,
+              confidence: `${result.probability}%`,
+              date: timestamp
+          };
+
+          // 3. Open the Vault and get the old history (or an empty array if it's their first time)
+          const existingHistory = JSON.parse(localStorage.getItem('synthScanHistory')) || [];
+
+          // ==========================================
+          // YOUR PUZZLE:
+          // How do you create a new array called `updatedHistory` 
+          // that puts `newScan` at the very beginning, followed by everything in `existingHistory`?
+          // (Hint: Use the JavaScript Spread Operator `...`)
+          // ==========================================
+          const updatedHistory = [newScan, ...existingHistory];
+
+          // 4. Lock the updated pile back into the Vault
+          localStorage.setItem('synthScanHistory', JSON.stringify(updatedHistory));
+
+          // 5. Teleport to the stats page! (We don't need the state backpack anymore)
+          navigate('/stats');
+      }
     } catch (error) {
       console.error("The delivery crashed:", error);
     }finally{

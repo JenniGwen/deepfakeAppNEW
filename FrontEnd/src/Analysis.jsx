@@ -1,4 +1,5 @@
-import {ActivityIcon} from "lucide-react"
+import { ActivityIcon } from "lucide-react";
+import { useState, useEffect } from "react"; // <-- Added React imports
 
 const STATS = [
   { label: "Today's Scans", value: "47", accent: "text-white", icon: "↗", iconColor: "text-green-400" },
@@ -16,6 +17,19 @@ const ANALYSES = [
 ];
 
 export default function Analysis() {
+  // 1. Set up React State
+  const [displayAnalyses, setDisplayAnalyses] = useState(ANALYSES);
+
+  // 2. Open the vault when the page loads
+  useEffect(() => {
+    const savedHistory = JSON.parse(localStorage.getItem('synthScanHistory'));
+    
+    if (savedHistory && savedHistory.length > 0) {
+      // 3. THE FIX: Call the function with parentheses!
+      setDisplayAnalyses([...savedHistory, ...ANALYSES]);
+    }
+  }, []); 
+
   return (
     <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
       {/* Main */}
@@ -57,8 +71,9 @@ export default function Analysis() {
               </tr>
             </thead>
             <tbody>
-              {ANALYSES.map(({ file, result, confidence, date }) => (
-                <tr key={file} className="border-b border-[#1e2538] last:border-0 hover:bg-slate-800/30 transition-colors">
+              {/* 4. Using the combined array */}
+              {displayAnalyses.map(({ file, result, confidence, date }, index) => (
+                <tr key={index} className="border-b border-[#1e2538] last:border-0 hover:bg-slate-800/30 transition-colors">
                   <td className="py-4 text-slate-200">{file}</td>
                   <td className="py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold
