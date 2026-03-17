@@ -1,13 +1,6 @@
 import { ActivityIcon } from "lucide-react";
 import { useState, useEffect } from "react"; // <-- Added React imports
 
-const STATS = [
-  { label: "Today's Scans", value: "47", accent: "text-white", icon: "↗", iconColor: "text-green-400" },
-  { label: "Detected Fakes", value: "12", accent: "text-white", icon: "⊙", iconColor: "text-red-400" },
-  { label: "Avg Confidence", value: "95.3%", accent: "text-blue-400", icon: null },
-  { label: "Processing Time", value: "2.4s", accent: "text-white", icon: null },
-];
-
 const ANALYSES = [
   { file: "interview_video.mp4",    result: "Real", confidence: "98.4%", date: "2026-03-07 14:23" },
   { file: "social_media_clip.mov",  result: "Fake", confidence: "94.2%", date: "2026-03-07 13:45" },
@@ -29,6 +22,33 @@ export default function Analysis() {
       setDisplayAnalyses([...savedHistory, ...ANALYSES]);
     }
   }, []); 
+  // ==========================================
+  // THE REAL-TIME MATH ENGINE (Derived State)
+  // ==========================================
+  
+  // 1. Total Scans (How many items are in the table?)
+  const totalScans = displayAnalyses.length;
+
+  // 2. Detected Fakes
+  // YOUR PUZZLE: Use the JavaScript .filter() method to look at `displayAnalyses` 
+  // and keep only the items where the `result` is "Fake" or "Deepfake". Then get the .length!
+  const detectedFakes = displayAnalyses.filter((item) => item.result === "Fake" || item.result === "Deepfake").length;
+
+  // 3. Average Confidence 
+  // (I'll give you this one, because parsing strings with "%" signs is tedious!)
+  const totalConfidence = displayAnalyses.reduce((sum, item) => {
+      const num = parseFloat(item.confidence.replace('%', ''));
+      return sum + num;
+  }, 0);
+  const avgConfidence = (totalConfidence / totalScans).toFixed(1) + "%";
+
+  // 4. Build the new dynamic array for the UI
+  const dynamicStats = [
+    { label: "Today's Scans", value: totalScans, accent: "text-white", icon: "↗", iconColor: "text-green-400" },
+    { label: "Detected Fakes", value: detectedFakes, accent: "text-white", icon: "⊙", iconColor: "text-red-400" },
+    { label: "Avg Confidence", value: avgConfidence, accent: "text-blue-400", icon: null },
+    { label: "Processing Time", value: "3.0s", accent: "text-white", icon: null }, // We will leave this hardcoded until we actually track Python's speed!
+  ];
 
   return (
     <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
@@ -45,7 +65,7 @@ export default function Analysis() {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-4 gap-4">
-          {STATS.map(({ label, value, accent, icon, iconColor }) => (
+          {dynamicStats.map(({ label, value, accent, icon, iconColor }) => (
             <div key={label} className="bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-slate-400 text-sm">{label}</span>
