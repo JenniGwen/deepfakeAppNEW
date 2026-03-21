@@ -104,6 +104,15 @@ def preprocess_for_onnx(face_bgr, freq_features):
     
     return image_input, freq_input
 
+@app.route('/', methods=['GET'])
+def health_check():
+    """The Front Door to prove the server is awake!"""
+    return jsonify({
+        "status": "online", 
+        "message": "SynthScan Neural Engine is awake and ready!",
+        "version": "1.0"
+    }), 200
+
 @app.route('/api/scan', methods=['POST'])
 def scan_image():
     time.sleep(3)
