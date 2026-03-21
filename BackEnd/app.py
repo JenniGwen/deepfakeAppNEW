@@ -115,7 +115,6 @@ def health_check():
 
 @app.route('/api/scan', methods=['POST'])
 def scan_image():
-    time.sleep(3)
     # 1. Catch the image from the React Frontend
     if 'file' not in request.files:
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
