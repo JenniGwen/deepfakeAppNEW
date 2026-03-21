@@ -45,7 +45,7 @@ export default function Dashboard() {
     sendData.append("file", rawFile)
     try {
 
-      const response = await fetch("http://127.0.0.1:5001/api/scan", {
+      const response = await fetch("http://isitfakeapi.vercel.app/api/scan", {
       method: "POST",
       body: sendData,
       });
