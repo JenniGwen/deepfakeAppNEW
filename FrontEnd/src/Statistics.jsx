@@ -56,7 +56,7 @@ export default function Statistics(){
     // 4. Build the dynamic array right before React draws the screen
     const dynamicStats = [
         { 
-            label: "Videos Analyzed", 
+            label: "Images Analyzed", 
             value: totalScans, 
             icon: BarChart3, 
             iconColor: "text-blue-400", 
@@ -70,14 +70,14 @@ export default function Statistics(){
             text: "Based on C23 Dataset" 
         },
         { 
-            label: "Real Videos", 
+            label: "Real Images", 
             value: realCount, 
             icon: AlertTriangle, 
             iconColor: "text-red-400", 
             text: `${realPercent}% of total` 
         },
         { 
-            label: "Fake Videos", 
+            label: "Fake Images", 
             value: fakeCount, 
             icon: TrendingUpIcon, 
             iconColor: "text-blue-400", 

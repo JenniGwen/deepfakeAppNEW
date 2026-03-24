@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 const STATS = [
-  { value: "1,247", label: "Videos Analyzed" },
+  { value: "1,247", label: "Images Analyzed" },
   { value: "98.4%", label: "Accuracy Rate" },
   { value: "<3s", label: "Avg. Processing Time" },
 ];
@@ -144,7 +144,7 @@ export default function Dashboard() {
               <Upload size={50}/>
               </div>
               <p className="font-semibold text-sm">
-                {fileName ?? "Drop your video here or click to browse"}
+                {fileName ?? "Drop your image here or click to browse"}
               </p>
               </>
             )}

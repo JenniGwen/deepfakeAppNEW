@@ -132,9 +132,9 @@ export default function Settings() {
                   type="text"
                   value={apiKey}
                   readOnly
-                  className="flex-1 bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-400 focus:outline-none"
+                  className="flex-1 min-w-0 bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-400 focus:outline-none"
                 />
-                <button className="bg-[#1e2538] hover:bg-slate-700 border border-[#2d3748] text-slate-300 text-sm px-4 py-3 rounded-lg transition-colors cursor-pointer">
+                <button className="shrink-0 bg-[#1e2538] hover:bg-slate-700 border border-[#2d3748] text-slate-300 text-sm px-4 py-3 rounded-lg transition-colors cursor-pointer">
                   Regenerate
                 </button>
               </div>
@@ -156,31 +156,22 @@ export default function Settings() {
           </div>
 
           <div className="flex flex-col gap-5">
-            <div className="grid grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm text-slate-400 mb-2">Theme</label>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className="w-full bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
-                >
-                  <option>Dark</option>
-                  <option>Light</option>
-                  <option>System</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-slate-400 mb-2">Language</label>
+            <div className="grid gap-5">
+              <label className="block text-sm text-slate-400 mb-2">Language</label>
+              <div className="relative">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                  className="w-full bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer appearance-none"
                 >
                   <option>English</option>
-                  <option>Spanish</option>
-                  <option>French</option>
-                  <option>German</option>
+                  <option>Indonesian</option>
                 </select>
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </div>
             <div>

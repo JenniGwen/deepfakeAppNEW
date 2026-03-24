@@ -2,11 +2,11 @@ import { ActivityIcon } from "lucide-react";
 import { useState, useEffect } from "react"; // <-- Added React imports
 
 const ANALYSES = [
-  { file: "interview_video.mp4",    result: "Real", confidence: "98.4%", date: "2026-03-07 14:23" },
-  { file: "social_media_clip.mov",  result: "Fake", confidence: "94.2%", date: "2026-03-07 13:45" },
-  { file: "news_segment.mp4",       result: "Real", confidence: "96.7%", date: "2026-03-07 12:18" },
-  { file: "viral_video.avi",        result: "Fake", confidence: "89.5%", date: "2026-03-07 11:02" },
-  { file: "documentary_clip.mp4",   result: "Real", confidence: "97.1%", date: "2026-03-07 09:34" },
+  { file: "interview_image.jpg",    result: "Real", confidence: "98.4%", date: "2026-03-07 14:23" },
+  { file: "social_media.png",  result: "Fake", confidence: "94.2%", date: "2026-03-07 13:45" },
+  { file: "news_segment.jpg",       result: "Real", confidence: "96.7%", date: "2026-03-07 12:18" },
+  { file: "viral.png",        result: "Fake", confidence: "89.5%", date: "2026-03-07 11:02" },
+  { file: "documentary.jpeg",   result: "Real", confidence: "97.1%", date: "2026-03-07 09:34" },
 ];
 
 export default function Analysis() {
