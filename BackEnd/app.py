@@ -146,7 +146,7 @@ def scan_image():
         return jsonify({
             "status": "success",
             "result": final_result,
-            "confidence": confidence,
+            "probability": confidence,
             "probability_fake": round(prob_fake * 100, 2),
             "probability_real": round(prob_real * 100, 2)
         })
