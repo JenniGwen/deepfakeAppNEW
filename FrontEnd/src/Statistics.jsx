@@ -1,5 +1,5 @@
 import { BarChart3, CheckCircle, AlertTriangle, TrendingUpIcon } from 'lucide-react'
-import { useState, useEffect } from 'react'; // 1. We need our React tools!
+// import { useState, useEffect } from 'react'; // 1. We need our React tools!
 
 const PERFORMANCE_METRICS = [
   { 
@@ -31,59 +31,54 @@ const MIDDLEPART = [
 
 export default function Statistics(){
     // 2. Set up the state to hold our Vault data
-    const [scanHistory, setScanHistory] = useState([]);
-
-    // 3. Open the Vault when the page loads
-    useEffect(() => {
-        const savedHistory = JSON.parse(localStorage.getItem('synthScanHistory'));
-        if (savedHistory && savedHistory.length > 0) {
-            setScanHistory(savedHistory);
-        }
-    }, []);
+    // const [scanHistory] = useState(() => {
+    //     const savedHistory = JSON.parse(localStorage.getItem('synthScanHistory'));
+    //     return savedHistory && savedHistory.length > 0 ? savedHistory : [];
+    // });
 
     // ==========================================
     // THE REAL-TIME MATH ENGINE
     // ==========================================
-    const totalScans = scanHistory.length;
+    // const totalScans = scanHistory.length;
     
-    const realCount = scanHistory.filter((item) => item.result === "Real").length;
-    const fakeCount = scanHistory.filter((item) => item.result === "Fake" || item.result === "Deepfake").length;
+    // const realCount = scanHistory.filter((item) => item.result === "Real").length;
+    // const fakeCount = scanHistory.filter((item) => item.result === "Fake" || item.result === "Deepfake").length;
 
     // Calculate the percentages (Preventing "division by zero" if the vault is empty!)
-    const realPercent = totalScans > 0 ? Math.round((realCount / totalScans) * 100) : 0;
-    const fakePercent = totalScans > 0 ? Math.round((fakeCount / totalScans) * 100) : 0;
+    // const realPercent = totalScans > 0 ? Math.round((realCount / totalScans) * 100) : 0;
+    // const fakePercent = totalScans > 0 ? Math.round((fakeCount / totalScans) * 100) : 0;
 
     // 4. Build the dynamic array right before React draws the screen
-    const dynamicStats = [
-        { 
-            label: "Images Analyzed", 
-            value: totalScans, 
-            icon: BarChart3, 
-            iconColor: "text-blue-400", 
-            text: "All time records" 
-        },
-        { 
-            label: "Accuracy", 
-            value: "98.4%", // Kept static for the competition demo!
-            icon: CheckCircle, 
-            iconColor: "text-green-400", 
-            text: "Based on C23 Dataset" 
-        },
-        { 
-            label: "Real Images", 
-            value: realCount, 
-            icon: AlertTriangle, 
-            iconColor: "text-red-400", 
-            text: `${realPercent}% of total` 
-        },
-        { 
-            label: "Fake Images", 
-            value: fakeCount, 
-            icon: TrendingUpIcon, 
-            iconColor: "text-blue-400", 
-            text: `${fakePercent}% of total` 
-        }
-    ];
+    // const dynamicStats = [
+    //     { 
+    //         label: "Images Analyzed", 
+    //         value: totalScans, 
+    //         icon: BarChart3, 
+    //         iconColor: "text-blue-400", 
+    //         text: "All time records" 
+    //     },
+    //     { 
+    //         label: "Accuracy", 
+    //         value: "98.4%", // Kept static for the competition demo!
+    //         icon: CheckCircle, 
+    //         iconColor: "text-green-400", 
+    //         text: "Based on C23 Dataset" 
+    //     },
+    //     { 
+    //         label: "Real Images", 
+    //         value: realCount, 
+    //         icon: AlertTriangle, 
+    //         iconColor: "text-red-400", 
+    //         text: `${realPercent}% of total` 
+    //     },
+    //     { 
+    //         label: "Fake Images", 
+    //         value: fakeCount, 
+    //         icon: TrendingUpIcon, 
+    //         iconColor: "text-blue-400", 
+    //         text: `${fakePercent}% of total` 
+    //     }
+    // ];
 
     return(
         <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
@@ -99,7 +94,7 @@ export default function Statistics(){
                 {/* The 4 top cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* 5. Swap this to map over dynamicStats instead of STATS */}
-                    {dynamicStats.map(({label, value, icon:Icon, iconColor, text}) =>(
+                    {/* {dynamicStats.map(({label, value, icon:Icon, iconColor, text}) =>(
                         <div key={label} className="bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5">
                             <div className="flex gap-3 items-center">
                                 <div className='p-2 bg-white/5 rounded-lg border border-white/10'>
@@ -110,7 +105,7 @@ export default function Statistics(){
                             <div className={`text-3xl font-bold pt-3`}>{value}</div>
                             <div className={'text-xs text-slate-400 font-sans pt-1'}>{text}</div>
                         </div>
-                    ))}
+                    ))} */}
                 </div>
 
                 {/* --- The rest of your code remains EXACTLY the same --- */}

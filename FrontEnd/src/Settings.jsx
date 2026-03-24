@@ -22,9 +22,8 @@ export default function Settings() {
   const [emailNotif, setEmailNotif] = useState(true);
   const [desktopAlerts, setDesktopAlerts] = useState(false);
   const [autoDelete, setAutoDelete] = useState(true);
-  const [apiKey, setApiKey] = useState("sk-••••••••••••••••••••••••");
+  const [apiKey] = useState("sk-••••••••••••••••••••••••");
   const [twoFactor, setTwoFactor] = useState(false);
-  const [theme, setTheme] = useState("Dark");
   const [language, setLanguage] = useState("English");
   const [sensitivity, setSensitivity] = useState(75);
 

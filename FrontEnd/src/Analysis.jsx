@@ -1,5 +1,5 @@
 import { ActivityIcon } from "lucide-react";
-import { useState, useEffect } from "react"; // <-- Added React imports
+// import { useState, useEffect } from "react"; // <-- Added React imports
 
 const ANALYSES = [
   { file: "interview_image.jpg",    result: "Real", confidence: "98.4%", date: "2026-03-07 14:23" },
@@ -10,45 +10,40 @@ const ANALYSES = [
 ];
 
 export default function Analysis() {
-  // 1. Set up React State
-  const [displayAnalyses, setDisplayAnalyses] = useState(ANALYSES);
-
-  // 2. Open the vault when the page loads
-  useEffect(() => {
-    const savedHistory = JSON.parse(localStorage.getItem('synthScanHistory'));
-    
-    if (savedHistory && savedHistory.length > 0) {
-      // 3. THE FIX: Call the function with parentheses!
-      setDisplayAnalyses([...savedHistory, ...ANALYSES]);
-    }
-  }, []); 
+  //1. set up state
+  //   const [displayAnalyses] = useState(() => {
+  //   const savedHistory = JSON.parse(localStorage.getItem('synthScanHistory'));
+  //   return savedHistory && savedHistory.length > 0
+  //     ? [...savedHistory, ...ANALYSES]
+  //     : ANALYSES;
+  // });
   // ==========================================
   // THE REAL-TIME MATH ENGINE (Derived State)
   // ==========================================
   
   // 1. Total Scans (How many items are in the table?)
-  const totalScans = displayAnalyses.length;
+  //const totalScans = displayAnalyses.length;
 
   // 2. Detected Fakes
   // YOUR PUZZLE: Use the JavaScript .filter() method to look at `displayAnalyses` 
   // and keep only the items where the `result` is "Fake" or "Deepfake". Then get the .length!
-  const detectedFakes = displayAnalyses.filter((item) => item.result === "Fake" || item.result === "Deepfake").length;
+  //const detectedFakes = displayAnalyses.filter((item) => item.result === "Fake" || item.result === "Deepfake").length;
 
   // 3. Average Confidence 
   // (I'll give you this one, because parsing strings with "%" signs is tedious!)
-  const totalConfidence = displayAnalyses.reduce((sum, item) => {
-      const num = parseFloat(item.confidence.replace('%', ''));
-      return sum + num;
-  }, 0);
-  const avgConfidence = (totalConfidence / totalScans).toFixed(1) + "%";
+  // const totalConfidence = displayAnalyses.reduce((sum, item) => {
+  //     const num = parseFloat(item.confidence.replace('%', ''));
+  //     return sum + num;
+  // }, 0);
+  //const avgConfidence = (totalConfidence / totalScans).toFixed(1) + "%";
 
   // 4. Build the new dynamic array for the UI
-  const dynamicStats = [
-    { label: "Today's Scans", value: totalScans, accent: "text-white", icon: "↗", iconColor: "text-green-400" },
-    { label: "Detected Fakes", value: detectedFakes, accent: "text-white", icon: "⊙", iconColor: "text-red-400" },
-    { label: "Avg Confidence", value: avgConfidence, accent: "text-blue-400", icon: null },
-    { label: "Processing Time", value: "3.0s", accent: "text-white", icon: null }, // We will leave this hardcoded until we actually track Python's speed!
-  ];
+  // const dynamicStats = [
+  //   { label: "Today's Scans", value: totalScans, accent: "text-white", icon: "↗", iconColor: "text-green-400" },
+  //   { label: "Detected Fakes", value: detectedFakes, accent: "text-white", icon: "⊙", iconColor: "text-red-400" },
+  //   { label: "Avg Confidence", value: avgConfidence, accent: "text-blue-400", icon: null },
+  //   { label: "Processing Time", value: "3.0s", accent: "text-white", icon: null }, // We will leave this hardcoded until we actually track Python's speed!
+  // ];
 
   return (
     <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
@@ -65,7 +60,7 @@ export default function Analysis() {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-4 gap-4">
-          {dynamicStats.map(({ label, value, accent, icon, iconColor }) => (
+          {/* {dynamicStats.map(({ label, value, accent, icon, iconColor }) => (
             <div key={label} className="bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-slate-400 text-sm">{label}</span>
@@ -73,7 +68,7 @@ export default function Analysis() {
               </div>
               <div className={`text-3xl font-bold ${accent}`}>{value}</div>
             </div>
-          ))}
+          ))} */}
         </div>
 
         {/* Recent Analyses Table */}
@@ -92,7 +87,7 @@ export default function Analysis() {
             </thead>
             <tbody>
               {/* 4. Using the combined array */}
-              {displayAnalyses.map(({ file, result, confidence, date }, index) => (
+              {/* {displayAnalyses.map(({ file, result, confidence, date }, index) => (
                 <tr key={index} className="border-b border-[#1e2538] last:border-0 hover:bg-slate-800/30 transition-colors">
                   <td className="py-4 text-slate-200">{file}</td>
                   <td className="py-4">
@@ -112,7 +107,7 @@ export default function Analysis() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))} */}
             </tbody>
           </table>
         </section>
