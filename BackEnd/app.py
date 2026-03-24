@@ -124,12 +124,14 @@ def scan_image():
         
         # 4. Run inference
         # NEW: Only one input, not two!
+        # 4. Run inference
         raw_output = session.run(None, {input_name: model_input})[0]
         
         # 5. Convert to probability
-        # Sigmoid because model outputs logits
-        prob_fake = 1 / (1 + np.exp(-raw_output[0][0]))
-        prob_fake = float(prob_fake)
+        # Flatten safely grabs the number regardless of whether it's [2.4], [[2.4]], or just 2.4
+        raw_val = float(np.array(raw_output).flatten()[0])
+        
+        prob_fake = 1 / (1 + np.exp(-raw_val))
         prob_real = 1 - prob_fake
         
         # 6. Determine result
