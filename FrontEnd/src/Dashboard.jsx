@@ -45,12 +45,13 @@ export default function Dashboard() {
     sendData.append("file", rawFile)
     try {
 
-      const response = await fetch("https://isitfakeapi.vercel.app/api/scan", {
+      const response = await fetch("http://localhost:5001/api/scan", {
       method: "POST",
       body: sendData,
       });
 
       const result = await response.json();
+      console.log("API RESPONSE:", result);
       if (result.status === "success") {
           // 1. Generate the timestamp for right now
           const now = new Date();

@@ -10,7 +10,6 @@ const ANALYSES = [
 ];
 
 export default function Analysis() {
-  //1. set up state
     const [displayAnalyses] = useState(() => {
     const savedHistory = JSON.parse(localStorage.getItem('synthScanHistory'));
     return savedHistory && savedHistory.length > 0
