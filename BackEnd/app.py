@@ -68,7 +68,7 @@ def crop_face(image_bgr):
     """Finds the largest face in the image and crops it with 10% padding"""
     gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(
-        gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
+        gray, scaleFactor=1.1, minNeighbors=8, minSize=(80, 80)
     )
     if len(faces) > 0:
         x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
@@ -152,7 +152,7 @@ def scan_image():
         return jsonify({"status": "error", "message": "Invalid image format"}), 400
 
     try:
-        # 1. Crop face
+        # 1. Crop the largest face
         cropped_face = crop_face(face_bgr)
 
         # 2. Preprocess (matching training notebook exactly)
