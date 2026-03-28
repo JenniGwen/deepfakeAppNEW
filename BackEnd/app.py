@@ -2,60 +2,18 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
 import cv2
-import torch
-import torch.nn as nn
-import timm
+import onnxruntime as ort
 
 app = Flask(__name__)
 CORS(app)
 
 # ============================================================
-# MODEL ARCHITECTURE (exact copy from training notebook Cell 34)
+# LOAD ONNX MODEL
 # ============================================================
-class DeepfakeDetector(nn.Module):
-    def __init__(self, use_fft_channel=True):
-        super().__init__()
-        self.use_fft = use_fft_channel
-        self.backbone = timm.create_model(
-            'efficientnet_b0', pretrained=False, num_classes=0
-        )
-
-        if self.use_fft:
-            old_conv = self.backbone.conv_stem
-            new_conv = nn.Conv2d(
-                4, old_conv.out_channels,
-                kernel_size=old_conv.kernel_size,
-                stride=old_conv.stride,
-                padding=old_conv.padding,
-                bias=old_conv.bias is not None
-            )
-            self.backbone.conv_stem = new_conv
-
-        self.head = nn.Sequential(
-            nn.Dropout(0.3),
-            nn.Linear(1280, 256),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(256, 1)
-        )
-
-    def forward(self, x):
-        features = self.backbone(x)
-        return self.head(features).squeeze(1)
-
-
-# ============================================================
-# LOAD THE TRAINED WEIGHTS
-# ============================================================
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MODEL_PATH = "best_model.pth"
-
-model = DeepfakeDetector(use_fft_channel=True)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
-model.to(DEVICE)
-model.eval()
-print(f"Model loaded on {DEVICE}")
-print(f"Parameters: {sum(p.numel() for p in model.parameters()):,}")
+MODEL_PATH = "best_model.onnx"
+session = ort.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
+input_name = session.get_inputs()[0].name
+print(f"ONNX model loaded: {MODEL_PATH}")
 
 # ============================================================
 # FACE CROPPER
@@ -101,7 +59,7 @@ def make_fft_channel(image_bgr, size=224):
 def preprocess_image(face_bgr):
     """
     Matches training notebook's predict_image() (Cell 37):
-    1. RGB 224x224 → ImageNet normalize → tensor
+    1. RGB 224x224 -> ImageNet normalize -> numpy array
     2. FFT power spectrum channel
     3. Concatenate to 4 channels
     """
@@ -114,16 +72,15 @@ def preprocess_image(face_bgr):
     img_normalized = (img_input - mean) / std
 
     # (224,224,3) -> (3,224,224)
-    img_tensor = torch.tensor(
-        np.transpose(img_normalized, (2, 0, 1)), dtype=torch.float32
-    )
+    img_chw = np.transpose(img_normalized, (2, 0, 1))
 
     # --- FFT channel ---
     fft_ch = make_fft_channel(face_bgr, size=224)
-    fft_tensor = torch.tensor(fft_ch, dtype=torch.float32).unsqueeze(0)
+    fft_ch = np.expand_dims(fft_ch, axis=0)  # (1, 224, 224)
 
     # --- Combine: (4, 224, 224) -> (1, 4, 224, 224) ---
-    combined = torch.cat([img_tensor, fft_tensor], dim=0).unsqueeze(0)
+    combined = np.concatenate([img_chw, fft_ch], axis=0)
+    combined = np.expand_dims(combined, axis=0).astype(np.float32)
     return combined
 
 
@@ -135,7 +92,7 @@ def health_check():
     return jsonify({
         "status": "online",
         "message": "SynthScan Neural Engine is awake and ready!",
-        "version": "2.0 (PyTorch)"
+        "version": "2.0 (ONNX)"
     }), 200
 
 
@@ -156,12 +113,11 @@ def scan_image():
         cropped_face = crop_face(face_bgr)
 
         # 2. Preprocess (matching training notebook exactly)
-        input_tensor = preprocess_image(cropped_face).to(DEVICE)
+        input_array = preprocess_image(cropped_face)
 
         # 3. Inference
-        with torch.no_grad():
-            logit = model(input_tensor)
-            prob_fake = torch.sigmoid(logit).item()
+        logit = session.run(None, {input_name: input_array})[0][0]
+        prob_fake = 1.0 / (1.0 + np.exp(-np.clip(logit, -50, 50)))
 
         prob_real = 1.0 - prob_fake
         fake_percent = round(prob_fake * 100, 1)
@@ -175,7 +131,7 @@ def scan_image():
             final_result = "Real"
             confidence = real_percent
 
-        print(f"Logit: {logit.item():.4f} | P(fake): {fake_percent}% | Result: {final_result} ({confidence}%)")
+        print(f"Logit: {logit:.4f} | P(fake): {fake_percent}% | Result: {final_result} ({confidence}%)")
 
         return jsonify({
             "status": "success",
