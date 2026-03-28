@@ -116,8 +116,8 @@ def scan_image():
         input_array = preprocess_image(cropped_face)
 
         # 3. Inference
-        logit = session.run(None, {input_name: input_array})[0][0]
-        prob_fake = 1.0 / (1.0 + np.exp(-np.clip(logit, -50, 50)))
+        logit = float(session.run(None, {input_name: input_array})[0][0])
+        prob_fake = 1.0 / (1.0 + np.exp(-max(-50, min(50, logit))))
 
         prob_real = 1.0 - prob_fake
         fake_percent = round(prob_fake * 100, 1)
