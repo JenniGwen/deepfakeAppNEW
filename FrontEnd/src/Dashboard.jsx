@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Upload } from "lucide-react"
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 
-const STATS = [
-  { value: "1,247", label: "Images Analyzed" },
-  { value: "98.4%", label: "Accuracy Rate" },
-  { value: "<3s", label: "Avg. Processing Time" },
+const STATS_KEYS = [
+  { value: "1,247", key: "imagesAnalyzed" },
+  { value: "98.4%", key: "accuracyRate" },
+  { value: "<3s", key: "avgProcessingTime" },
 ];
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -98,19 +100,19 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold">IsItFake?</h1>
+            <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
             <p className="text-slate-500 text-sm mt-1">
-              Advanced AI-powered media verification and analysis
+              {t('dashboard.subtitle')}
             </p>
           </div>
           <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer">
-            ✦ AI Powered
+            {t('dashboard.aiPowered')}
           </button>
         </header>
 
         {/* Scanning Card */}
         <section className="bg-[#161b27] border border-[#1e2538] rounded-2xl p-7">
-          <h2 className="text-blue-400 text-lg font-semibold mb-5">Scanning Station</h2>
+          <h2 className="text-blue-400 text-lg font-semibold mb-5">{t('dashboard.scanningStation')}</h2>
 
           {/* Drop Zone */}
           <div
@@ -145,12 +147,12 @@ export default function Dashboard() {
               <Upload size={50}/>
               </div>
               <p className="font-semibold text-sm">
-                {fileName ?? "Drop your image here or click to browse"}
+                {fileName ?? t('dashboard.dropFile')}
               </p>
               </>
             )}
             <p className="text-slate-500 text-xs mt-2">
-                Supported formats: JPG, PNG, WebP
+                {t('dashboard.supportedFormats')}
             </p>
             
           </div>
@@ -171,27 +173,27 @@ export default function Dashboard() {
                     : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white cursor-pointer active:scale-95 shadow-lg shadow-cyan-500/20" 
                   }`}
               >
-                {isScanning ? "Scanning... Please wait" : "Run Analysis"}
+                {isScanning ? t('dashboard.scanningWait') : t('dashboard.runAnalysis')}
               </button>
             </div>
         </section>
 
         {/* Stats */}
         <div className="flex gap-4">
-          {STATS.map(({ value, label }) => (
+          {STATS_KEYS.map(({ value, key }) => (
             <div
-              key={label}
+              key={key}
               className="flex-1 bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5"
             >
               <div className="text-3xl font-bold text-blue-400">{value}</div>
-              <div className="text-slate-400 text-sm mt-1">{label}</div>
+              <div className="text-slate-400 text-sm mt-1">{t(`dashboard.${key}`)}</div>
             </div>
           ))}
         </div>
 
         {/* Footer */}
         <footer className="mt-auto text-slate-600 text-xs">
-          © 2026 Deepfake Vision AI. All rights reserved.
+          {t('dashboard.footer')}
         </footer>
       </main>
     </div>

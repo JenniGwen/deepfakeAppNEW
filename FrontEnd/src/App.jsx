@@ -1,4 +1,5 @@
-import { useState } from "react"; // 1. Import useState!
+import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Analysis from "./Analysis";
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
 ];
 
 export function App() {
+  const { t } = useTranslation();
   // 3. The Sliding Door State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -84,7 +86,7 @@ export function App() {
                 }
               >
                 <div className="text-base">{Icon && <Icon size={20}/>}</div>
-                {label}
+                {t(`app.${label.toLowerCase()}`)}
               </NavLink>
             ))}
           </nav>
@@ -92,8 +94,8 @@ export function App() {
           <div className="flex items-center gap-3 bg-[#1e2538] rounded-xl px-3 py-2.5">
             <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">AI</div>
             <div className="text-xs">
-              <div className="font-semibold">AI Admin</div>
-              <div className="text-[10px] text-slate-500">Administrator</div>
+              <div className="font-semibold">{t('app.adminName')}</div>
+              <div className="text-[10px] text-slate-500">{t('app.adminRole')}</div>
             </div>
           </div>
         </aside>

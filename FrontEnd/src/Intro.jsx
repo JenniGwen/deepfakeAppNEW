@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ActivityIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Intro({ onComplete }) {
+  const { t } = useTranslation();
   // We use these two states to trigger Tailwind's CSS transitions
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -31,11 +33,11 @@ export default function Intro({ onComplete }) {
         <ActivityIcon size={64} className="text-cyan-400 animate-pulse mb-6" />
         
         <h1 className="text-4xl font-bold text-white tracking-widest uppercase mb-2">
-          IsItFake
+          {t('intro.title')}
         </h1>
         
         <p className="text-cyan-500 tracking-[0.3em] text-sm font-mono opacity-80">
-          NEURAL ENGINE INITIALIZING...
+          {t('intro.loading')}
         </p>
         
         {/* The Progress Bar Container */}
