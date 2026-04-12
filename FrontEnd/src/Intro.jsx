@@ -24,15 +24,15 @@ export default function Intro({ onComplete }) {
 
   return (
     // 'fixed inset-0 z-50' forces this black screen to cover everything else on the website
-    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f1117] transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0f1117] transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       
       {/* This div slides up slightly and fades in */}
       <div className={`flex flex-col items-center transition-all duration-1000 transform ${isVisible ? 'translate-y-0' : 'translate-y-10'}`}>
         
         {/* A pulsing neon icon */}
-        <ActivityIcon size={64} className="text-cyan-400 animate-pulse mb-6" />
+        <ActivityIcon size={64} className="text-cyan-500 dark:text-cyan-400 animate-pulse mb-6" />
         
-        <h1 className="text-4xl font-bold text-white tracking-widest uppercase mb-2">
+        <h1 className="text-4xl font-bold text-slate-800 dark:text-white tracking-widest uppercase mb-2">
           {t('intro.title')}
         </h1>
         
@@ -41,7 +41,7 @@ export default function Intro({ onComplete }) {
         </p>
         
         {/* The Progress Bar Container */}
-        <div className="w-64 h-1 bg-[#1e2538] mt-8 rounded-full overflow-hidden">
+        <div className="w-64 h-1 bg-slate-200 dark:bg-[#1e2538] mt-8 rounded-full overflow-hidden">
            {/* The Neon Fill (Changes width based on our 'progress' state) */}
            <div 
              className="h-full bg-cyan-400 transition-all ease-out" 

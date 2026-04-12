@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Analysis from "./Analysis";
 import Statistics from "./Statistics";
 import Settings from "./Settings";
 import Intro from "./Intro";
-import { SettingsIcon, HomeIcon, ActivityIcon, BarChart3, Menu, X } from 'lucide-react' // 2. Import Menu and X
+import Login from "./Login";
+import Register from "./Register";
+import { SettingsIcon, HomeIcon, ActivityIcon, BarChart3, Menu, X, LogOut, Moon, Sun } from 'lucide-react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 const NAV_ITEMS = [
   { icon: HomeIcon, label: "Dashboard", path: "/" },
@@ -15,31 +19,37 @@ const NAV_ITEMS = [
   { icon: SettingsIcon, label: "Settings", path: "/settings" },
 ];
 
-export function App() {
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-[#0f1117]">Loading...</div>;
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  return children;
+}
+
+function MainAppShell() {
   const { t } = useTranslation();
-  // 3. The Sliding Door State
+  const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [showIntro, setShowIntro] = useState(() => {
     return !sessionStorage.getItem('introPlayed');
   });
 
-  // 3. CREATE THE SHUT-OFF SWITCH
   const handleIntroComplete = () => {
-    sessionStorage.setItem('introPlayed', 'true'); // Save to memory
-    setShowIntro(false); // Destroy the intro component
+    sessionStorage.setItem('introPlayed', 'true'); 
+    setShowIntro(false);
   };
 
   return (
     <>
-      {/* 4. DROP THE CURTAINS OVER THE APP */}
       {showIntro && <Intro onComplete={handleIntroComplete} />}
 
-    <BrowserRouter>
-      {/* We add overflow-hidden here to stop the whole page from bouncing on mobile */}
-      <div className="flex h-screen bg-[#0f1117] text-slate-200 overflow-hidden">
+      <div className="flex h-screen bg-slate-50 dark:bg-[#0f1117] text-slate-800 dark:text-slate-200 overflow-hidden transition-colors duration-300">
         
-        {/* 4. THE OVERLAY (Only shows on mobile when menu is open) */}
+        {/* Overlay */}
         {isMobileMenuOpen && (
           <div 
             className="fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity"
@@ -47,10 +57,10 @@ export function App() {
           />
         )}
 
-        {/* 5. THE SIDEBAR (Added translation physics and fixed positioning) */}
+        {/* SIDEBAR */}
         <aside className={`
           fixed md:static inset-y-0 left-0 z-50
-          w-60 bg-[#161b27] flex flex-col px-4 py-6 gap-8 border-r border-[#1e2538] shrink-0
+          w-60 bg-white dark:bg-[#161b27] flex flex-col px-4 py-6 gap-8 border-r border-slate-200 dark:border-[#1e2538] shrink-0
           transform transition-transform duration-300 ease-in-out
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} 
           md:translate-x-0 
@@ -62,9 +72,8 @@ export function App() {
               alt="IsItFake Logo" 
               className="w-44 h-auto object-contain drop-shadow-lg" 
             />
-            {/* Close button inside the sidebar (Mobile only) */}
             <button 
-              className="md:hidden text-slate-400 hover:text-white"
+              className="md:hidden text-slate-400 hover:text-slate-600 dark:hover:text-white"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <X size={24} />
@@ -76,13 +85,12 @@ export function App() {
               <NavLink
                 key={label}
                 to={path}
-                // Auto-close the door when a link is clicked!
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) => 
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors cursor-pointer
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors font-medium
                   ${isActive 
-                    ? "bg-blue-900/50 text-blue-400 font-semibold" 
-                    : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"}`
+                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold" 
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"}`
                 }
               >
                 <div className="text-base">{Icon && <Icon size={20}/>}</div>
@@ -91,11 +99,30 @@ export function App() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 bg-[#1e2538] rounded-xl px-3 py-2.5">
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">AI</div>
-            <div className="text-xs">
-              <div className="font-semibold">{t('app.adminName')}</div>
-              <div className="text-[10px] text-slate-500">{t('app.adminRole')}</div>
+          <div className="mb-2">
+            <button 
+              onClick={toggleTheme}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            <button 
+              onClick={logout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 mt-1 cursor-pointer"
+            >
+              <LogOut size={20} />
+              Logout
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 bg-slate-100 dark:bg-[#1e2538] rounded-xl px-3 py-2.5">
+            <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
+              {user?.display_name ? user.display_name.charAt(0).toUpperCase() : 'AI'}
+            </div>
+            <div className="text-xs overflow-hidden">
+              <div className="font-semibold truncate text-slate-800 dark:text-slate-200">{user?.display_name || t('app.adminName')}</div>
+              <div className="text-[10px] text-slate-500 truncate">{user?.role || t('app.adminRole')}</div>
             </div>
           </div>
         </aside>
@@ -103,18 +130,18 @@ export function App() {
         {/* MAIN CONTENT WRAPPER */}
         <div className="flex-1 flex flex-col min-w-0">
           
-          {/* 6. THE MOBILE HEADER (Hamburger Button - Hidden on Desktop!) */}
-          <header className="md:hidden flex items-center justify-between p-4 bg-[#161b27] border-b border-[#1e2538]">
+          {/* MOBILE HEADER */}
+          <header className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-[#161b27] border-b border-slate-200 dark:border-[#1e2538]">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-600 dark:text-slate-400"
               >
                 <Menu size={28} />
               </button>
               <img src="/Group 5.svg" alt="Logo" className="h-6 object-contain" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">AI</div>
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs text-white">AI</div>
           </header>
 
           <main className="flex-1 overflow-y-auto">
@@ -128,8 +155,27 @@ export function App() {
         </div>
 
       </div>
-    </BrowserRouter>
     </>
+  );
+}
+
+export function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <MainAppShell />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

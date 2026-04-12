@@ -19,8 +19,8 @@ function Toggle({ enabled, onToggle }) {
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
-  const [displayName, setDisplayName] = useState(() => t('app.adminName'));
-  const [email, setEmail] = useState("admin@deepfakevision.ai");
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
   const [emailNotif, setEmailNotif] = useState(true);
   const [desktopAlerts, setDesktopAlerts] = useState(false);
   const [autoDelete, setAutoDelete] = useState(true);
@@ -33,43 +33,70 @@ export default function Settings() {
     i18n.changeLanguage(language);
   }, [language, i18n]);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${apiUrl}/api/profile`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        });
+        
+        const result = await response.json();
+        if (result.status === 'success' && result.data?.user_aktif) {
+          setDisplayName(result.data.user_aktif.display_name);
+          setEmail(result.data.user_aktif.email);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile settings", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   return (
-    <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
+    <div className="flex min-h-screen bg-transparent transition-colors duration-300">
       {/* Main */}
       <main className="flex-1 flex flex-col gap-6 px-10 py-8 overflow-y-auto">
         {/* Header */}
-        <header className="flex items-center gap-4 pb-4 border-b border-[#1e2538]">
-          <span className="text-cyan-400 text-2xl"><SettingsIcon size={30}/></span>
+        <header className="flex items-center gap-4 pb-4 border-b border-slate-200 dark:border-[#1e2538]">
+          <span className="text-cyan-500 dark:text-cyan-400 text-2xl"><SettingsIcon size={30}/></span>
           <div>
-            <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
-            <p className="text-slate-500 text-sm mt-1">{t('settings.subtitle')}</p>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">{t('settings.title')}</h1>
+            <p className="text-slate-500 dark:text-slate-500 text-sm mt-1">{t('settings.subtitle')}</p>
           </div>
         </header>
 
         {/* Account Settings */}
-        <section className="bg-[#161b27] border border-[#1e2538] rounded-2xl p-7">
+        <section className="bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl p-7 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-cyan-400 text-xl">👤</span>
-            <h2 className="text-lg font-bold">{t('settings.accountSettings')}</h2>
+            <span className="text-cyan-500 dark:text-cyan-400 text-xl">👤</span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('settings.accountSettings')}</h2>
           </div>
 
           <div className="flex flex-col gap-5">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">{t('settings.displayName')}</label>
+              <label className="block text-sm text-slate-500 dark:text-slate-400 mb-2">{t('settings.displayName')}</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-slate-50 dark:bg-[#1e2538] border border-slate-200 dark:border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-2">{t('settings.emailAddress')}</label>
+              <label className="block text-sm text-slate-500 dark:text-slate-400 mb-2">{t('settings.emailAddress')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-slate-50 dark:bg-[#1e2538] border border-slate-200 dark:border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
             <div className="flex justify-end">
@@ -81,24 +108,24 @@ export default function Settings() {
         </section>
 
         {/* Notifications */}
-        <section className="bg-[#161b27] border border-[#1e2538] rounded-2xl p-7">
+        <section className="bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl p-7 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-cyan-400 text-xl">🔔</span>
-            <h2 className="text-lg font-bold">{t('settings.notifications')}</h2>
+            <span className="text-cyan-500 dark:text-cyan-400 text-xl">🔔</span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('settings.notifications')}</h2>
           </div>
 
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm font-semibold">{t('settings.emailNotifications')}</div>
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('settings.emailNotifications')}</div>
                 <div className="text-xs text-slate-500 mt-0.5">{t('settings.emailNotifDesc')}</div>
               </div>
               <Toggle enabled={emailNotif} onToggle={() => setEmailNotif(!emailNotif)} />
             </div>
-            <div className="border-t border-[#1e2538]" />
+            <div className="border-t border-slate-200 dark:border-[#1e2538]" />
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm font-semibold">{t('settings.desktopAlerts')}</div>
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('settings.desktopAlerts')}</div>
                 <div className="text-xs text-slate-500 mt-0.5">{t('settings.desktopAlertsDesc')}</div>
               </div>
               <Toggle enabled={desktopAlerts} onToggle={() => setDesktopAlerts(!desktopAlerts)} />
@@ -107,46 +134,46 @@ export default function Settings() {
         </section>
 
         {/* Security & Privacy */}
-        <section className="bg-[#161b27] border border-[#1e2538] rounded-2xl p-7">
+        <section className="bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl p-7 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-cyan-400 text-xl">🛡</span>
-            <h2 className="text-lg font-bold">{t('settings.securityPrivacy')}</h2>
+            <span className="text-cyan-500 dark:text-cyan-400 text-xl">🛡</span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('settings.securityPrivacy')}</h2>
           </div>
 
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm font-semibold">{t('settings.autoDelete')}</div>
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('settings.autoDelete')}</div>
                 <div className="text-xs text-slate-500 mt-0.5">{t('settings.autoDeleteDesc')}</div>
               </div>
               <Toggle enabled={autoDelete} onToggle={() => setAutoDelete(!autoDelete)} />
             </div>
-            <div className="border-t border-[#1e2538]" />
+            <div className="border-t border-slate-200 dark:border-[#1e2538]" />
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm font-semibold">{t('settings.twoFactor')}</div>
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('settings.twoFactor')}</div>
                 <div className="text-xs text-slate-500 mt-0.5">{t('settings.twoFactorDesc')}</div>
               </div>
               <Toggle enabled={twoFactor} onToggle={() => setTwoFactor(!twoFactor)} />
             </div>
-            <div className="border-t border-[#1e2538]" />
+            <div className="border-t border-slate-200 dark:border-[#1e2538]" />
             <div>
-              <label className="block text-sm text-slate-400 mb-2">{t('settings.apiKey')}</label>
+              <label className="block text-sm text-slate-500 dark:text-slate-400 mb-2">{t('settings.apiKey')}</label>
               <div className="flex gap-3">
                 <input
                   type="text"
                   value={apiKey}
                   readOnly
-                  className="flex-1 min-w-0 bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-400 focus:outline-none"
+                  className="flex-1 min-w-0 bg-slate-50 dark:bg-[#1e2538] border border-slate-200 dark:border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-500 dark:text-slate-400 focus:outline-none"
                 />
-                <button className="shrink-0 bg-[#1e2538] hover:bg-slate-700 border border-[#2d3748] text-slate-300 text-sm px-4 py-3 rounded-lg transition-colors cursor-pointer">
+                <button className="shrink-0 bg-slate-100 dark:bg-[#1e2538] hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-[#2d3748] text-slate-700 dark:text-slate-300 text-sm px-4 py-3 rounded-lg transition-colors cursor-pointer">
                   {t('settings.regenerate')}
                 </button>
               </div>
             </div>
-            <div className="border-t border-[#1e2538]" />
+            <div className="border-t border-slate-200 dark:border-[#1e2538]" />
             <div>
-              <button className="border border-red-700 text-red-400 hover:bg-red-900/30 text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors cursor-pointer">
+              <button className="border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors cursor-pointer">
                 {t('settings.clearHistory')}
               </button>
             </div>
@@ -154,23 +181,23 @@ export default function Settings() {
         </section>
 
         {/* Preferences */}
-        <section className="bg-[#161b27] border border-[#1e2538] rounded-2xl p-7">
+        <section className="bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl p-7 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-cyan-400 text-xl">🎛</span>
-            <h2 className="text-lg font-bold">{t('settings.preferences')}</h2>
+            <span className="text-cyan-500 dark:text-cyan-400 text-xl">🎛</span>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('settings.preferences')}</h2>
           </div>
 
           <div className="flex flex-col gap-5">
             <div className="grid gap-5">
-              <label className="block text-sm text-slate-400 mb-2">{t('settings.language')}</label>
+              <label className="block text-sm text-slate-500 dark:text-slate-400 mb-2">{t('settings.language')}</label>
               <div className="relative">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full bg-[#1e2538] border border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer appearance-none"
+                  className="w-full bg-slate-50 dark:bg-[#1e2538] border border-slate-200 dark:border-[#2d3748] rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer appearance-none"
                 >
-                  <option value="en">{t('settings.english')}</option>
-                  <option value="id">{t('settings.indonesian')}</option>
+                  <option value="en" className="text-slate-900 dark:text-slate-200 bg-white dark:bg-[#1e2538]">{t('settings.english')}</option>
+                  <option value="id" className="text-slate-900 dark:text-slate-200 bg-white dark:bg-[#1e2538]">{t('settings.indonesian')}</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
                   <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,8 +207,8 @@ export default function Settings() {
               </div>
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-2">
-                {t('settings.detectionSensitivity')} — <span className="text-blue-400 font-semibold">{sensitivity}%</span>
+              <label className="block text-sm text-slate-500 dark:text-slate-400 mb-2">
+                {t('settings.detectionSensitivity')} — <span className="text-blue-600 dark:text-blue-400 font-semibold">{sensitivity}%</span>
               </label>
               <input
                 type="range"
@@ -201,7 +228,7 @@ export default function Settings() {
 
         {/* Help button */}
         <div className="flex justify-end pb-2">
-          <button className="w-8 h-8 rounded-full bg-[#1e2538] text-slate-400 hover:text-white hover:bg-slate-700 text-sm font-bold transition-colors cursor-pointer">
+          <button className="w-8 h-8 rounded-full bg-slate-200 dark:bg-[#1e2538] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-slate-700 text-sm font-bold transition-colors cursor-pointer shadow-sm">
             ?
           </button>
         </div>

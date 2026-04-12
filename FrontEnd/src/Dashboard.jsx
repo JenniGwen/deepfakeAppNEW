@@ -45,44 +45,28 @@ export default function Dashboard() {
     setIsScanning(true);
     const sendData = new FormData();
     sendData.append("file", rawFile)
-    try {
 
-      const response = await fetch("http://localhost:5001/api/scan", {
-      method: "POST",
-      body: sendData,
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/scan`, {
+        method: "POST",
+        headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: sendData,
       });
 
       const result = await response.json();
       console.log("API RESPONSE:", result);
+      
       if (result.status === "success") {
-          // 1. Generate the timestamp for right now
-          const now = new Date();
-          const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-          // 2. Package the new scan into a neat object
-          const newScan = {
-              file: rawFile.name,
-              result: result.result,
-              confidence: `${result.probability}%`,
-              date: timestamp
-          };
-
-          // 3. Open the Vault and get the old history (or an empty array if it's their first time)
-          const existingHistory = JSON.parse(localStorage.getItem('synthScanHistory')) || [];
-
-          // ==========================================
-          // YOUR PUZZLE:
-          // How do you create a new array called `updatedHistory` 
-          // that puts `newScan` at the very beginning, followed by everything in `existingHistory`?
-          // (Hint: Use the JavaScript Spread Operator `...`)
-          // ==========================================
-          const updatedHistory = [newScan, ...existingHistory];
-
-          // 4. Lock the updated pile back into the Vault
-          localStorage.setItem('synthScanHistory', JSON.stringify(updatedHistory));
-
-          // 5. Teleport to the stats page! (We don't need the state backpack anymore)
+          // Backend has saved_to_history: true, so we don't need to manually push to localStorage anymore
+          // Set timeouts or directly teleport to stats page where the new API data is waiting!
           navigate('/stats');
+      } else {
+          console.error("Scan failed:", result.message);
       }
     } catch (error) {
       console.error("The delivery crashed:", error);
@@ -92,8 +76,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0f1117] text-slate-200 font-sans">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-transparent transition-colors duration-300">
+      {/* Sidebar is now moved to App.jsx Wrapper */}
 
       {/* Main */}
       <main className="flex-1 flex flex-col gap-6 px-10 py-8">
@@ -101,7 +85,7 @@ export default function Dashboard() {
         <header className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
               {t('dashboard.subtitle')}
             </p>
           </div>
@@ -111,8 +95,8 @@ export default function Dashboard() {
         </header>
 
         {/* Scanning Card */}
-        <section className="bg-[#161b27] border border-[#1e2538] rounded-2xl p-7">
-          <h2 className="text-blue-400 text-lg font-semibold mb-5">{t('dashboard.scanningStation')}</h2>
+        <section className="bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl p-7 shadow-sm">
+          <h2 className="text-blue-600 dark:text-blue-400 text-lg font-semibold mb-5">{t('dashboard.scanningStation')}</h2>
 
           {/* Drop Zone */}
           <div
@@ -122,8 +106,8 @@ export default function Dashboard() {
             onDrop={handleDrop}
             className={`border-2 border-dashed rounded-xl py-16 px-6 text-center cursor-pointer transition-all
               ${dragging
-                ? "border-blue-400 bg-blue-900/20"
-                : "border-slate-600 hover:border-slate-400 hover:bg-slate-800/30"
+                ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                : "border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/30"
               }`}
           >
             <input
@@ -137,21 +121,21 @@ export default function Dashboard() {
               <>
               <img src={urlImage} 
               alt="Uploaded preview"
-              className="max-h-64 object-contain mx-auto rounded-lg"/>
-              <p className="text-slate-200 text-xs mt-2">{fileName}</p>
+              className="max-h-64 object-contain mx-auto rounded-lg shadow-sm border border-slate-100 dark:border-[#1e2538]"/>
+              <p className="text-slate-700 dark:text-slate-200 text-xs mt-3 font-medium">{fileName}</p>
               </>
               
             ) : (
               <>
-              <div className="flex text-4xl text-slate-400 mb-4 justify-center items-center">
+              <div className="flex text-4xl text-slate-400 dark:text-slate-500 mb-4 justify-center items-center">
               <Upload size={50}/>
               </div>
-              <p className="font-semibold text-sm">
+              <p className="font-semibold text-sm text-slate-700 dark:text-slate-300">
                 {fileName ?? t('dashboard.dropFile')}
               </p>
               </>
             )}
-            <p className="text-slate-500 text-xs mt-2">
+            <p className="text-slate-500 dark:text-slate-500 text-xs mt-2">
                 {t('dashboard.supportedFormats')}
             </p>
             
@@ -166,10 +150,10 @@ export default function Dashboard() {
                 // 2. Base classes that NEVER change
                 className={`font-semibold px-12 py-3 rounded-xl transition-all duration-300
                   ${(isScanning || !fileName) 
-                    // 3a. DISABLED LOOK: Gray, faded, and not-allowed cursor
-                    ? "bg-slate-800 text-slate-500 cursor-not-allowed" 
+                    // 3a. DISABLED LOOK
+                    ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed" 
                     
-                    // 3b. ACTIVE LOOK: The beautiful gradient, shadow, and click animation
+                    // 3b. ACTIVE LOOK
                     : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white cursor-pointer active:scale-95 shadow-lg shadow-cyan-500/20" 
                   }`}
               >
@@ -183,16 +167,16 @@ export default function Dashboard() {
           {STATS_KEYS.map(({ value, key }) => (
             <div
               key={key}
-              className="flex-1 bg-[#161b27] border border-[#1e2538] rounded-2xl px-6 py-5"
+              className="flex-1 bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl px-6 py-5 shadow-sm"
             >
-              <div className="text-3xl font-bold text-blue-400">{value}</div>
-              <div className="text-slate-400 text-sm mt-1">{t(`dashboard.${key}`)}</div>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{value}</div>
+              <div className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t(`dashboard.${key}`)}</div>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <footer className="mt-auto text-slate-600 text-xs">
+        <footer className="mt-auto text-slate-400 dark:text-slate-600 text-xs">
           {t('dashboard.footer')}
         </footer>
       </main>
