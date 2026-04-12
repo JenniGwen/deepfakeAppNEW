@@ -1,4 +1,22 @@
+# --- Security / Environments ---
+.env
+
+# --- Python / Flask ---
 __pycache__/
-*.pkl
-# Apple Mac's Hidden Desktop Files
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# --- IDEs / Editors ---
+.idea/
+.vscode/
+
+# --- Machine Learning Models ---
+# (Abaikan kalau modelnya kecil dan memang mau disimpan di GitHub)
+*.pth
+*.onnx
+
+# --- OS generated files ---
 .DS_Store
