@@ -138,13 +138,25 @@ export const AuthProvider = ({ children }) => {
           headers: { 'Authorization': `Bearer ${token}` }
         });
       }
+      // Khusus untuk supabase oauth session state
+      await supabase.auth.signOut();
     } catch (error) {
       console.error("Error during logout call", error);
     } finally {
       setToken(null);
       setUser(null);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      
+      // Simpan preferensi UI agar tidak hilang saat session dihapus
+      const theme = localStorage.getItem('theme');
+      const introPlayed = sessionStorage.getItem('introPlayed');
+      
+      // Sapu bersih semua data storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Kembalikan preferensi UI
+      if (theme) localStorage.setItem('theme', theme);
+      if (introPlayed) sessionStorage.setItem('introPlayed', introPlayed);
     }
   };
 

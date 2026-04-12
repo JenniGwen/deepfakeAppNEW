@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Analysis from "./Analysis";
 import Statistics from "./Statistics";
@@ -34,6 +34,9 @@ function MainAppShell() {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [showIntro, setShowIntro] = useState(() => {
     return !sessionStorage.getItem('introPlayed');
   });
@@ -49,22 +52,11 @@ function MainAppShell() {
 
       <div className="flex h-screen bg-slate-50 dark:bg-[#0f1117] text-slate-800 dark:text-slate-200 overflow-hidden transition-colors duration-300">
         
-        {/* Overlay */}
-        {isMobileMenuOpen && (
-          <div 
-            className="fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity"
-            onClick={() => setIsMobileMenuOpen(false)} 
-          />
-        )}
-
-        {/* SIDEBAR */}
-        <aside className={`
-          fixed md:static inset-y-0 left-0 z-50
-          w-60 bg-white dark:bg-[#161b27] flex flex-col px-4 py-6 gap-8 border-r border-slate-200 dark:border-[#1e2538] shrink-0
-          transform transition-transform duration-300 ease-in-out
-          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} 
-          md:translate-x-0 
-        `}>
+        {/* SIDEBAR (Desktop Only) */}
+        <aside className="
+          hidden md:flex
+          w-60 bg-white dark:bg-[#161b27] flex-col px-4 py-6 gap-8 border-r border-slate-200 dark:border-[#1e2538] shrink-0
+        ">
           
           <div className="flex items-center justify-between px-2 mb-2">
             <img 
@@ -72,12 +64,6 @@ function MainAppShell() {
               alt="IsItFake Logo" 
               className="w-44 h-auto object-contain drop-shadow-lg" 
             />
-            <button 
-              className="md:hidden text-slate-400 hover:text-slate-600 dark:hover:text-white"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <X size={24} />
-            </button>
           </div>
 
           <nav className="flex flex-col gap-1 flex-1">
@@ -99,30 +85,32 @@ function MainAppShell() {
             ))}
           </nav>
 
-          <div className="mb-2">
-            <button 
-              onClick={toggleTheme}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            </button>
-            <button 
-              onClick={logout}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 mt-1 cursor-pointer"
-            >
-              <LogOut size={20} />
-              Logout
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3 bg-slate-100 dark:bg-[#1e2538] rounded-xl px-3 py-2.5">
-            <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs text-white">
-              {user?.display_name ? user.display_name.charAt(0).toUpperCase() : 'AI'}
+          <div className="flex flex-col bg-slate-100 dark:bg-[#1e2538] rounded-xl p-3 gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 flex-shrink-0 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm text-white">
+                {user?.display_name ? user.display_name.charAt(0).toUpperCase() : 'AI'}
+              </div>
+              <div className="text-xs overflow-hidden flex-1">
+                <div className="font-semibold text-sm truncate text-slate-800 dark:text-slate-200">{user?.display_name || t('app.adminName')}</div>
+                <div className="text-[11px] text-slate-500 truncate capitalize">{user?.role || t('app.adminRole')}</div>
+              </div>
             </div>
-            <div className="text-xs overflow-hidden">
-              <div className="font-semibold truncate text-slate-800 dark:text-slate-200">{user?.display_name || t('app.adminName')}</div>
-              <div className="text-[10px] text-slate-500 truncate">{user?.role || t('app.adminRole')}</div>
+            
+            <div className="flex items-center border-t border-slate-200 dark:border-slate-700/50 pt-3 gap-2">
+              <button 
+                onClick={toggleTheme}
+                className="flex-1 flex items-center justify-center p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer shadow-sm hover:shadow"
+                title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button 
+                onClick={logout}
+                className="flex-1 flex items-center justify-center p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/40 hover:text-red-600 dark:hover:text-red-400 transition-all cursor-pointer shadow-sm hover:shadow"
+                title="Logout"
+              >
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
         </aside>
@@ -131,20 +119,21 @@ function MainAppShell() {
         <div className="flex-1 flex flex-col min-w-0">
           
           {/* MOBILE HEADER */}
-          <header className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-[#161b27] border-b border-slate-200 dark:border-[#1e2538]">
+          <header className="md:hidden relative flex items-center justify-between p-4 bg-white dark:bg-[#161b27] border-b border-slate-200 dark:border-[#1e2538] z-30">
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="text-slate-600 dark:text-slate-400"
-              >
-                <Menu size={28} />
-              </button>
-              <img src="/Group 5.svg" alt="Logo" className="h-6 object-contain" />
+              <img src="/Group 5.svg" alt="Logo" className="h-6 object-contain ml-1" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs text-white">AI</div>
+            
+            <button 
+              onClick={toggleTheme}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-[#1e2538] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200 dark:border-slate-700/50"
+              title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </header>
 
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-x-hidden overflow-y-auto pb-4 transition-all duration-300">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/stats" element={<Analysis />} />
@@ -152,6 +141,25 @@ function MainAppShell() {
               <Route path="/settings" element={<Settings/>} />   
             </Routes>
           </main>
+
+          {/* MOBILE BOTTOM NAV */}
+          <nav className="md:hidden flex items-center justify-around bg-white dark:bg-[#161b27] border-t border-slate-200 dark:border-[#1e2538] pb-safe pt-2 px-2 z-30">
+            {NAV_ITEMS.map(({ icon:Icon, label, path }) => (
+              <NavLink
+                key={label}
+                to={path}
+                className={({ isActive }) => 
+                  `flex flex-col items-center justify-center gap-1 p-2 min-w-[64px] rounded-xl transition-all duration-300
+                  ${isActive 
+                    ? "text-blue-600 dark:text-blue-400 font-bold" 
+                    : "text-slate-500 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"}`
+                }
+              >
+                <div className="text-xl mb-0.5">{Icon && <Icon size={24} strokeWidth={2.5} />}</div>
+                <span className="text-[10px] leading-none mb-1 font-semibold">{t(`app.${label.toLowerCase()}`)}</span>
+              </NavLink>
+            ))}
+          </nav>
         </div>
 
       </div>
@@ -167,11 +175,7 @@ export function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/*" element={
-              <ProtectedRoute>
-                <MainAppShell />
-              </ProtectedRoute>
-            } />
+            <Route path="/*" element={<MainAppShell />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

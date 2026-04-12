@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ActivityIcon, UserPlus } from 'lucide-react';
+import { UserPlus, ArrowLeft } from 'lucide-react';
 import { supabase } from './supabase';
 
 export default function Register() {
@@ -51,18 +51,20 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0f1117] text-slate-800 dark:text-slate-200 items-center justify-center p-4 transition-colors duration-300">
+    <div className="flex min-h-screen bg-white dark:bg-[#161b27] md:bg-slate-50 md:dark:bg-[#0f1117] text-slate-800 dark:text-slate-200 items-center justify-center p-0 md:p-4 transition-colors duration-300">
       
-      <div className="w-full max-w-md bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-8">
+      <div className="w-full h-screen md:h-auto md:max-w-md bg-white dark:bg-[#161b27] md:border md:border-slate-200 md:dark:border-[#1e2538] md:rounded-2xl md:shadow-xl overflow-y-auto flex flex-col relative">
+        <div className="px-6 py-8 md:p-8 flex-1 flex flex-col justify-center">
           
-          <div className="flex justify-center mb-6">
-            <div className="flex items-center gap-2">
-              <span className="text-cyan-500"><ActivityIcon size={32}/></span>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400">
-                IsItFake?
-              </span>
-            </div>
+          <div className="flex items-center justify-center relative w-full mb-8">
+            <button
+              onClick={() => navigate('/')}
+              className="absolute left-0 w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 dark:bg-[#0f1117] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer shadow-sm border border-slate-200 dark:border-slate-700/50"
+              title="Back to Home"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <img src="/Group 5.svg" alt="IsItFake Logo" className="h-7 md:h-9 object-contain ml-3" />
           </div>
           
           <h1 className="text-2xl font-bold text-center mb-2">Create Account</h1>
@@ -179,7 +181,7 @@ export default function Register() {
 
         </div>
         
-        <div className="bg-slate-100 dark:bg-[#11141d] px-8 py-4 border-t border-slate-200 dark:border-[#1e2538] text-center text-sm">
+        <div className="bg-slate-100 dark:bg-[#11141d] px-8 py-6 md:py-4 md:border-t md:border-slate-200 md:dark:border-[#1e2538] text-center text-sm mt-auto shrink-0">
           <span className="text-slate-500 dark:text-slate-400">Already have an account? </span>
           <Link to="/login" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
             Sign In

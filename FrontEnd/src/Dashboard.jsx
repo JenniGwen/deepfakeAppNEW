@@ -1,22 +1,81 @@
-import { useState } from "react";
-import { Upload } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Upload, Lock, X } from "lucide-react"
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-
-const STATS_KEYS = [
-  { value: "1,247", key: "imagesAnalyzed" },
-  { value: "98.4%", key: "accuracyRate" },
-  { value: "<3s", key: "avgProcessingTime" },
-];
+import { useAuth } from './context/AuthContext';
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [rawFile, setRawFile] = useState(null);
   const [urlImage, setUrlImage] = useState(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [summaryData, setSummaryData] = useState({
+    today_scans: 0,
+    avg_confidence: 0,
+    avg_processing_time: "3.0"
+  });
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${apiUrl}/api/statistics/summary`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        });
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) setSummaryData(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch summary:", error);
+      }
+    };
+    fetchSummary();
+
+    // Check for persisted image
+    const cachedImage = sessionStorage.getItem('pendingImage');
+    const cachedName = sessionStorage.getItem('pendingFileName');
+    const cachedType = sessionStorage.getItem('pendingFileType');
+    if (cachedImage && cachedName) {
+      fetch(cachedImage)
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], cachedName, { type: cachedType || 'image/jpeg' });
+          setRawFile(file);
+          setFileName(cachedName);
+          setUrlImage(cachedImage);
+        });
+    }
+  }, []);
+
+  const saveFileToStorage = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        sessionStorage.setItem('pendingImage', e.target.result);
+        sessionStorage.setItem('pendingFileName', file.name);
+        sessionStorage.setItem('pendingFileType', file.type);
+      } catch (err) {
+        console.warn("Image too large to cache", err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const STATS_KEYS = [
+    { value: summaryData.today_scans, key: "imagesAnalyzed" },
+    { value: `${summaryData.avg_confidence}%`, key: "accuracyRate" },
+    { value: `${summaryData.avg_processing_time || "3.0"}s`, key: "avgProcessingTime" },
+  ];
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -25,7 +84,8 @@ export default function Dashboard() {
     if (file) {
       setFileName(file.name);
       setRawFile(file);
-      setUrlImage(URL.createObjectURL(file))
+      setUrlImage(URL.createObjectURL(file));
+      saveFileToStorage(file);
     }
       
   };
@@ -35,13 +95,19 @@ export default function Dashboard() {
     if (file) {
       setFileName(file.name);
       setRawFile(file);
-      setUrlImage(URL.createObjectURL(file))
+      setUrlImage(URL.createObjectURL(file));
+      saveFileToStorage(file);
     }
   };
 
   const navigate = useNavigate();
 
   const handleScan = async () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
     setIsScanning(true);
     const sendData = new FormData();
     sendData.append("file", rawFile)
@@ -62,8 +128,9 @@ export default function Dashboard() {
       console.log("API RESPONSE:", result);
       
       if (result.status === "success") {
-          // Backend has saved_to_history: true, so we don't need to manually push to localStorage anymore
-          // Set timeouts or directly teleport to stats page where the new API data is waiting!
+          sessionStorage.removeItem('pendingImage');
+          sessionStorage.removeItem('pendingFileName');
+          sessionStorage.removeItem('pendingFileType');
           navigate('/stats');
       } else {
           console.error("Scan failed:", result.message);
@@ -79,12 +146,39 @@ export default function Dashboard() {
     <div className="flex min-h-screen bg-transparent transition-colors duration-300">
       {/* Sidebar is now moved to App.jsx Wrapper */}
 
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50/50 dark:bg-[#0f1117]/60 backdrop-blur-md">
+          <div className="bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] flex flex-col items-center text-center p-8 max-w-sm w-full mx-4 rounded-2xl shadow-xl relative">
+            <button 
+              onClick={() => setShowLoginPrompt(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shadow-none border-none bg-transparent cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-5">
+              <Lock className="text-blue-600 dark:text-blue-400" size={28} />
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">{t('analysis.lockedTitle', 'Login Required')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">
+              {t('analysis.lockedMessage', 'Log in to your account to process this media with advanced AI analysis.')}
+            </p>
+            <button 
+              onClick={() => navigate('/login')}
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg transition-colors cursor-pointer shadow-md"
+            >
+              {t('analysis.loginNow', 'Login Now')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main */}
-      <main className="flex-1 flex flex-col gap-6 px-10 py-8">
+      <main className="flex-1 flex flex-col gap-6 px-4 md:px-10 py-6 md:py-8 w-full max-w-[100vw] overflow-x-hidden">
         {/* Header */}
-        <header className="flex justify-between items-start">
+        <header className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
+            <h1 className="text-lg lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{t('dashboard.title')}</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
               {t('dashboard.subtitle')}
             </p>
@@ -163,14 +257,14 @@ export default function Dashboard() {
         </section>
 
         {/* Stats */}
-        <div className="flex gap-4">
-          {STATS_KEYS.map(({ value, key }) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
+          {STATS_KEYS.map(({ value, key }, index) => (
             <div
               key={key}
-              className="flex-1 bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl px-6 py-5 shadow-sm"
+              className={`bg-white dark:bg-[#161b27] border border-slate-200 dark:border-[#1e2538] rounded-2xl px-4 py-4 md:px-6 md:py-5 shadow-sm ${index === 2 ? 'col-span-2 sm:col-span-1' : ''}`}
             >
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{value}</div>
-              <div className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t(`dashboard.${key}`)}</div>
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{value}</div>
+              <div className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-1">{t(`dashboard.${key}`)}</div>
             </div>
           ))}
         </div>
