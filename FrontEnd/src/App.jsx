@@ -11,6 +11,7 @@ import Register from "./Register";
 import { SettingsIcon, HomeIcon, ActivityIcon, BarChart3, Menu, X, LogOut, Moon, Sun } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import LoadingOverlay from './components/LoadingOverlay';
 
 const NAV_ITEMS = [
   { icon: HomeIcon, label: "Dashboard", path: "/" },
@@ -167,16 +168,28 @@ function MainAppShell() {
   );
 }
 
+function AuthLoadingGate({ children }) {
+  const { authLoading, authLoadingMessage } = useAuth();
+  return (
+    <>
+      {authLoading && <LoadingOverlay message={authLoadingMessage} />}
+      {children}
+    </>
+  );
+}
+
 export function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/*" element={<MainAppShell />} />
-          </Routes>
+          <AuthLoadingGate>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/*" element={<MainAppShell />} />
+            </Routes>
+          </AuthLoadingGate>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

@@ -4,7 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from controllers.analysis_controllers import scan_image
-from controllers.auth_controllers import register, login, logout
+from controllers.auth_controllers import register, login, logout, google_auth
 from controllers.daily_statistic_controllers import get_stats, show_all_data
 from controllers.test_controllers import test_connection
 from core.response_json import success_response
@@ -18,6 +18,7 @@ app.add_url_rule('/api/test-db', view_func=test_connection, methods=['GET'])
 app.add_url_rule('/api/register', view_func=register, methods=['POST'])
 app.add_url_rule('/api/login', view_func=login, methods=['POST'])
 app.add_url_rule('/api/logout', view_func=logout, methods=['POST'])
+app.add_url_rule('/api/auth/google', view_func=google_auth, methods=['POST'])
 
 app.add_url_rule('/api/statistics/summary', view_func=get_stats, methods=['GET'])
 app.add_url_rule('/api/statistics/history', view_func=show_all_data, methods=['GET'])

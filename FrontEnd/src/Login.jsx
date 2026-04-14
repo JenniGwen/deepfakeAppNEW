@@ -3,11 +3,10 @@ import { useAuth } from './context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LogIn, ArrowLeft } from 'lucide-react';
-import { supabase } from './supabase';
 
 export default function Login() {
   const { t } = useTranslation();
-  const { login } = useAuth();
+  const { login, startGoogleLogin } = useAuth();
   const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
@@ -32,17 +31,10 @@ export default function Login() {
   };
 
   const handleGoogleAuth = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'http://localhost:5173/'
-        }
-      });
-      if (error) throw error;
-    } catch (error) {
-      console.error("Gagal login dengan Google:", error.message);
-      setError("Google authentication failed.");
+    setError(null);
+    const result = await startGoogleLogin();
+    if (result && !result.success) {
+      setError(result.message);
     }
   };
 

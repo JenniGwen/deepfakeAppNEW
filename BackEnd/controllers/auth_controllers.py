@@ -4,7 +4,7 @@ from flask import request
 
 from core.response_json import error_response, success_response, server_error_response
 from middlewares.auth import token_required
-from services.auth_service import register_new_user, authenticate_user
+from services.auth_service import register_new_user, authenticate_user, google_login_or_register
 
 
 def register():
@@ -45,6 +45,24 @@ def login():
 
     except ValueError as ve:
         return error_response(message=str(ve), status_code=401)
+    except Exception as e:
+        return server_error_response(error_details=str(e))
+
+
+def google_auth():
+    try:
+        data = request.get_json()
+
+        if not data or not data.get("email"):
+            return error_response("Email wajib diisi!", status_code=400)
+
+        auth_data = google_login_or_register(
+            email=data.get("email"),
+            display_name=data.get("display_name")
+        )
+
+        return success_response(message="Google login berhasil!", data=auth_data, status_code=200)
+
     except Exception as e:
         return server_error_response(error_details=str(e))
 

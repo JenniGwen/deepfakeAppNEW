@@ -3,11 +3,10 @@ import { useAuth } from './context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { UserPlus, ArrowLeft } from 'lucide-react';
-import { supabase } from './supabase';
 
 export default function Register() {
   const { t } = useTranslation();
-  const { register } = useAuth();
+  const { register, startGoogleLogin } = useAuth();
   const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
@@ -36,17 +35,10 @@ export default function Register() {
   };
 
   const handleGoogleAuth = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'http://localhost:5173/'
-        }
-      });
-      if (error) throw error;
-    } catch (error) {
-      console.error("Gagal mendaftar dengan Google:", error.message);
-      setError("Google Registration failed.");
+    setError(null);
+    const result = await startGoogleLogin();
+    if (result && !result.success) {
+      setError(result.message);
     }
   };
 
