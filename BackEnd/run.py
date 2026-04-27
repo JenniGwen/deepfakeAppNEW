@@ -11,7 +11,7 @@ from core.response_json import success_response
 from middlewares.auth import token_required
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=False)
 
 # --- PUBLIC ROUTES ---
 app.add_url_rule('/api/test-db', view_func=test_connection, methods=['GET'])
