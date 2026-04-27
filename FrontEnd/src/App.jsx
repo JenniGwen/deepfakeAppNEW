@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Dashboard from "./Dashboard";
@@ -38,32 +38,102 @@ function MainAppShell() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const isHorizontalSwipe = useRef(false);
+  const swipeDir = useRef(0); // -1 = left, +1 = right
+
+  const [dragX, setDragX] = useState(0);
+  const [slideClass, setSlideClass] = useState('');
+
   const [showIntro, setShowIntro] = useState(() => {
     return !sessionStorage.getItem('introPlayed');
   });
 
   const handleIntroComplete = () => {
-    sessionStorage.setItem('introPlayed', 'true'); 
+    sessionStorage.setItem('introPlayed', 'true');
     setShowIntro(false);
   };
+
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isHorizontalSwipe.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    const deltaY = e.touches[0].clientY - touchStartY.current;
+
+    // Decide swipe axis on first meaningful movement
+    if (!isHorizontalSwipe.current && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
+      isHorizontalSwipe.current = Math.abs(deltaX) > Math.abs(deltaY);
+    }
+
+    if (isHorizontalSwipe.current) {
+      // Prevent vertical scroll while swiping horizontally
+      e.preventDefault();
+
+      const currentIndex = NAV_ITEMS.findIndex(item => item.path === location.pathname);
+      // Block drag if already at edge
+      const canGoLeft  = currentIndex < NAV_ITEMS.length - 1;
+      const canGoRight = currentIndex > 0;
+      if ((deltaX < 0 && !canGoLeft) || (deltaX > 0 && !canGoRight)) {
+        // Allow small rubber-band at edges
+        setDragX(deltaX * 0.1);
+      } else {
+        setDragX(deltaX * 0.35); // dampened drag feel
+      }
+    }
+  }, [location.pathname]);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    if (isHorizontalSwipe.current && Math.abs(deltaX) > 60) {
+      const currentIndex = NAV_ITEMS.findIndex(item => item.path === location.pathname);
+      if (deltaX < 0 && currentIndex < NAV_ITEMS.length - 1) {
+        swipeDir.current = -1;
+        setSlideClass('slide-in-left');
+        setDragX(0);
+        navigate(NAV_ITEMS[currentIndex + 1].path);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        swipeDir.current = 1;
+        setSlideClass('slide-in-right');
+        setDragX(0);
+        navigate(NAV_ITEMS[currentIndex - 1].path);
+      } else {
+        setDragX(0);
+      }
+    } else {
+      setDragX(0);
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isHorizontalSwipe.current = false;
+  }, [location.pathname, navigate]);
 
   return (
     <>
       {showIntro && <Intro onComplete={handleIntroComplete} />}
 
       <div className="flex h-screen bg-slate-50 dark:bg-[#0f1117] text-slate-800 dark:text-slate-200 overflow-hidden transition-colors duration-300">
-        
+
         {/* SIDEBAR (Desktop Only) */}
         <aside className="
           hidden md:flex
           w-60 bg-white dark:bg-[#161b27] flex-col px-4 py-6 gap-8 border-r border-slate-200 dark:border-[#1e2538] shrink-0
         ">
-          
+
           <div className="flex items-center justify-between px-2 mb-2">
-            <img 
-              src="/Group 5.svg" 
-              alt="IsItFake Logo" 
-              className="w-44 h-auto object-contain drop-shadow-lg" 
+            <img
+              src="/Group 5.svg"
+              alt="IsItFake Logo"
+              className="w-44 h-auto object-contain drop-shadow-lg"
             />
           </div>
 
@@ -73,10 +143,10 @@ function MainAppShell() {
                 key={label}
                 to={path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={({ isActive }) => 
+                className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left w-full transition-colors font-medium
-                  ${isActive 
-                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold" 
+                  ${isActive
+                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"}`
                 }
               >
@@ -96,16 +166,16 @@ function MainAppShell() {
                 <div className="text-[11px] text-slate-500 truncate capitalize">{user?.role || t('app.adminRole')}</div>
               </div>
             </div>
-            
+
             <div className="flex items-center border-t border-slate-200 dark:border-slate-700/50 pt-3 gap-2">
-              <button 
+              <button
                 onClick={toggleTheme}
                 className="flex-1 flex items-center justify-center p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer shadow-sm hover:shadow"
                 title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
               >
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-              <button 
+              <button
                 onClick={logout}
                 className="flex-1 flex items-center justify-center p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/40 hover:text-red-600 dark:hover:text-red-400 transition-all cursor-pointer shadow-sm hover:shadow"
                 title="Logout"
@@ -117,15 +187,15 @@ function MainAppShell() {
         </aside>
 
         {/* MAIN CONTENT WRAPPER */}
-        <div className="flex-1 flex flex-col min-w-0">
-          
+        <div className="flex-1 flex flex-col min-w-0 relative">
+
           {/* MOBILE HEADER */}
           <header className="md:hidden relative flex items-center justify-between p-4 bg-white dark:bg-[#161b27] border-b border-slate-200 dark:border-[#1e2538] z-30">
             <div className="flex items-center gap-3">
               <img src="/Group 5.svg" alt="Logo" className="h-6 object-contain ml-1" />
             </div>
-            
-            <button 
+
+            <button
               onClick={toggleTheme}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-[#1e2538] text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200 dark:border-slate-700/50"
               title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -134,32 +204,51 @@ function MainAppShell() {
             </button>
           </header>
 
-          <main className="flex-1 overflow-x-hidden overflow-y-auto pb-4 transition-all duration-300">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/stats" element={<Analysis />} />
-              <Route path="/charts" element={<Statistics />} />
-              <Route path="/settings" element={<Settings/>} />   
-            </Routes>
+          <main
+            className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-4"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ touchAction: 'pan-y' }}
+          >
+            <div
+              key={location.pathname}
+              className={slideClass}
+              onAnimationEnd={() => setSlideClass('')}
+              style={{
+                transform: dragX !== 0 ? `translateX(${dragX}px)` : undefined,
+                transition: dragX === 0 ? 'transform 0.25s ease' : 'none',
+                willChange: 'transform',
+              }}
+            >
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/stats" element={<Analysis />} />
+                <Route path="/charts" element={<Statistics />} />
+                <Route path="/settings" element={<Settings/>} />
+              </Routes>
+            </div>
           </main>
 
-          {/* MOBILE BOTTOM NAV */}
-          <nav className="md:hidden flex items-center justify-around bg-white dark:bg-[#161b27] border-t border-slate-200 dark:border-[#1e2538] pb-safe pt-2 px-2 z-30">
-            {NAV_ITEMS.map(({ icon:Icon, label, path }) => (
-              <NavLink
-                key={label}
-                to={path}
-                className={({ isActive }) => 
-                  `flex flex-col items-center justify-center gap-1 p-2 min-w-[64px] rounded-xl transition-all duration-300
-                  ${isActive 
-                    ? "text-blue-600 dark:text-blue-400 font-bold" 
-                    : "text-slate-500 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"}`
-                }
-              >
-                <div className="text-xl mb-0.5">{Icon && <Icon size={24} strokeWidth={2.5} />}</div>
-                <span className="text-[10px] leading-none mb-1 font-semibold">{t(`app.${label.toLowerCase()}`)}</span>
-              </NavLink>
-            ))}
+          {/* MOBILE BOTTOM NAV — fixed to viewport bottom */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#161b27] border-t border-slate-200 dark:border-[#1e2538] pt-2 pb-safe px-1">
+            <div className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory">
+              {NAV_ITEMS.map(({ icon:Icon, label, path }) => (
+                <NavLink
+                  key={label}
+                  to={path}
+                  className={({ isActive }) =>
+                    `flex flex-col items-center justify-center gap-1 p-2 min-w-[72px] flex-1 snap-start rounded-xl transition-all duration-300
+                    ${isActive
+                      ? "text-blue-600 dark:text-blue-400 font-bold"
+                      : "text-slate-500 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"}`
+                  }
+                >
+                  <div className="text-xl mb-0.5">{Icon && <Icon size={24} strokeWidth={2.5} />}</div>
+                  <span className="text-[10px] leading-none mb-1 font-semibold">{t(`app.${label.toLowerCase()}`)}</span>
+                </NavLink>
+              ))}
+            </div>
           </nav>
         </div>
 

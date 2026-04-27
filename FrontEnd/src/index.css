@@ -16,7 +16,37 @@
 
 /* Dark Mode: Retain Original Deep Blue */
 .dark {
-  --color-blue-600: #2563eb; 
-  --color-blue-500: #3b82f6; 
-  --color-blue-100: #dbeafe; 
+  --color-blue-600: #2563eb;
+  --color-blue-500: #3b82f6;
+  --color-blue-100: #dbeafe;
+}
+
+/* Hide scrollbar but keep scrollability */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Safe area bottom padding for iOS notch devices */
+.pb-safe {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* Page swipe animations */
+@keyframes slideFromLeft {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes slideFromRight {
+  from { transform: translateX(40px);  opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.slide-in-right {
+  animation: slideFromRight 0.25s ease forwards;
+}
+.slide-in-left {
+  animation: slideFromLeft 0.25s ease forwards;
 }

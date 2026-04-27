@@ -16,18 +16,15 @@ export const AuthProvider = ({ children }) => {
   );
 
   useEffect(() => {
-    // 1. Check existing normal token
-    if (token) {
-      localStorage.setItem('token', token);
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) setUser(JSON.parse(savedUser));
-    } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setUser(null);
+    // 1. Restore user dari localStorage saat app pertama kali load
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    if (savedToken && savedUser) {
+      setUser(JSON.parse(savedUser));
     }
 
     // 2. Listen to Supabase Auth State (Khusus Google OAuth)
+    // Subscription dibuat SEKALI saja saat mount, bukan setiap token berubah
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session) {
@@ -81,21 +78,19 @@ export const AuthProvider = ({ children }) => {
           sessionStorage.removeItem('googleAuthPending');
           setAuthLoading(false);
           setAuthLoadingMessage('');
-        } else if (event === 'SIGNED_OUT') {
-           setToken(null);
-           setUser(null);
-           localStorage.removeItem('token');
-           localStorage.removeItem('user');
         }
+        // SIGNED_OUT dari Supabase tidak kita handle di sini karena:
+        // - Login email/password pakai JWT sendiri, bukan Supabase session
+        // - Logout sudah ditangani langsung di fungsi logout()
       }
     );
 
     setLoading(false);
-    
+
     return () => {
       subscription?.unsubscribe();
     };
-  }, [token]);
+  }, []); // ← empty deps: subscription dibuat SEKALI saat mount
 
   const login = async (email, password) => {
     setAuthLoading(true);
