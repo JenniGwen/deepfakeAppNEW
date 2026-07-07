@@ -2,17 +2,17 @@
 
 **An intelligent deepfake media detection platform for ASEAN.**
 
-Deepfakes are cheap to generate and increasingly hard to tell apart from real media, driving fraud, identity theft, and misinformation across Indonesia, Malaysia, and the wider ASEAN region. Most existing detectors are expensive, computationally heavy, or built for enterprise pipelines only — leaving ordinary users with no easy way to check what they see.
+Deepfakes are cheap to generate and increasingly hard to tell apart from real media, driving fraud, identity theft, and misinformation across Indonesia, Malaysia, and the wider ASEAN region. Most existing detectors are expensive, computationally heavy, or built for enterprise pipelines only, leaving ordinary users with no easy way to check what they see.
 
 **IsItFake?** is a free, web-based deepfake detection platform. Anyone can upload an image and instantly get a probability score of whether it's real or AI-generated, powered by a lightweight hybrid CNN + classical machine learning pipeline that runs entirely on CPU.
 
 ## Main Features
 
-- **Instant probability score** — Upload an image through the web app and get a real/fake probability in seconds, no technical knowledge required.
-- **Privacy by design** — Uploaded media is processed for detection only and is never stored, keeping the platform low-risk and low-cost to run.
-- **Enterprise model licensing** — The trained detection model can be licensed to enterprises and government bodies for integration into their own pipelines.
-- **Built for real-world media** — Trained to stay robust on the degraded, recompressed images typical of sharing on WhatsApp and Telegram.
-- **Regional & multilingual** — Launching in Bahasa Indonesia and English, with Malay planned as the platform scales across ASEAN.
+- **Instant probability score**: Upload an image through the web app and get a real/fake probability in seconds, no technical knowledge required.
+- **Privacy by design**: Uploaded media is processed for detection only and is never stored, keeping the platform low-risk and low-cost to run.
+- **Enterprise model licensing**: The trained detection model can be licensed to enterprises and government bodies for integration into their own pipelines.
+- **Built for real-world media**: Trained to stay robust on the degraded, recompressed images typical of sharing on WhatsApp and Telegram.
+- **Regional & multilingual**: Launching in Bahasa Indonesia and English, with Malay planned as the platform scales across ASEAN.
 
 ## Technology Used
 
@@ -24,12 +24,12 @@ Deepfakes are cheap to generate and increasingly hard to tell apart from real me
 - Python
 
 **AI / Machine Learning**
-- PyTorch — model training and fine-tuning
-- OpenCV & Albumentations — image preprocessing and augmentation
-- EfficientNet-B0 — CNN backbone, adapted to a 4-channel input
-- 2D Discrete Fourier Transform (2D-DFT) — frequency-domain feature extraction
-- Scikit-learn — classical ML classifiers (Random Forest, SVM) and feature scaling
-- ONNX Runtime — fast, CPU-only inference at serving time
+- PyTorch: model training and fine-tuning
+- OpenCV & Albumentations: image preprocessing and augmentation
+- EfficientNet-B0: CNN backbone, adapted to a 4-channel input
+- 2D Discrete Fourier Transform (2D-DFT): frequency-domain feature extraction
+- Scikit-learn: classical ML classifiers (Random Forest, SVM) and feature scaling
+- ONNX Runtime: fast, CPU-only inference at serving time
 
 **Training infrastructure**
 - Google Colab with an NVIDIA Tesla T4 GPU
@@ -78,5 +78,5 @@ AUC 0.9757            AUC 0.9757             AUC 0.9727
 
 ## Team
 
-Group Cerberus — BINUS University
+Group Cerberus (BINUS University)
 Aviel Aquino · Jennifer Gwen Tanadi · Jiovanny Lim
