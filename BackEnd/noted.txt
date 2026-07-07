@@ -1,2 +1,0 @@
-
-main file nya aku rubah sebelumnya app.py sekarang run.py
