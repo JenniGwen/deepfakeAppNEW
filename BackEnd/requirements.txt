@@ -43,3 +43,4 @@ packaging~=26.0
 PyJWT~=2.12.1
 protobuf~=7.34.1
 flatbuffers~=25.12.19
+scipy~=1.16.0
