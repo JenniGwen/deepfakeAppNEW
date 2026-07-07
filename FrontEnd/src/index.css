@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Light Mode: "Biru Muda" (Sky Blue) for Primary UI */
+:root {
+  --color-blue-600: #0ea5e9; /* Sky 500 */
+  --color-blue-500: #38bdf8; /* Sky 400 */
+  --color-blue-100: #e0f2fe; /* Sky 100 */
+}
+
+/* Dark Mode: Retain Original Deep Blue */
+.dark {
+  --color-blue-600: #2563eb;
+  --color-blue-500: #3b82f6;
+  --color-blue-100: #dbeafe;
+}
+
+/* Hide scrollbar but keep scrollability */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Safe area bottom padding for iOS notch devices */
+.pb-safe {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* Page swipe animations */
+@keyframes slideFromLeft {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes slideFromRight {
+  from { transform: translateX(40px);  opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.slide-in-right {
+  animation: slideFromRight 0.25s ease forwards;
+}
+.slide-in-left {
+  animation: slideFromLeft 0.25s ease forwards;
+}

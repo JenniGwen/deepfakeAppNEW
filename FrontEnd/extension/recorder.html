@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>itsdeepfake</title>
+    <link rel="stylesheet" href="recorder.css">
+</head>
+<body>
+    <div class="container">
+        <h2>itsdeepfake</h2>
+        <p class="subtitle" id="main-subtitle">AI Auto-Detection Background Monitor</p>
+        
+        <div id="video-container" class="hidden">
+            <video id="preview" autoplay muted></video>
+            <div id="result-badge" class="badge hidden">Memulai Scan...</div>
+        </div>
+
+        <button id="start-btn" class="btn primary">Mulai Auto-Detect</button>
+        <button id="stop-btn" class="btn secondary hidden" style="background:linear-gradient(to right, #ef4444, #dc2626); box-shadow:0 4px 14px rgba(239, 68, 68, 0.4);">Hentikan Auto-Detect</button>
+        
+        <p id="status-text"></p>
+    </div>
+    <script src="recorder.js"></script>
+</body>
+</html>
