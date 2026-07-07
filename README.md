@@ -1,3 +1,12 @@
+---
+title: Isitfake
+emoji: 🔍
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+app_port: 7860
+---
 # IsItFake?
 
 **An intelligent deepfake media detection platform for ASEAN.**
