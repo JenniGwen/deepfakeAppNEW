@@ -1,44 +1,40 @@
-# File: BackEnd/app/services/analysis_service.py
 import os
-
 import cv2
 import numpy as np
 import onnxruntime as ort
 import time
-
+from scipy import ndimage
 from core.db_connector import get_db
 
-# ============================================================
-# LOAD ONNX MODEL
-# ============================================================
-
-# Gunakan base directory agar path selalu benar dimanapun server dijalankan
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, "ml_models", "best_model.onnx")
+CNN_PATH = os.path.join(BASE_DIR, "ml_models", "cnn_features_v5.onnx")
+SVM_PATH = os.path.join(BASE_DIR, "ml_models", "rbf_svm_v5.onnx")
 
-# Inisialisasi session sebagai None dulu agar tidak NameError
-session = None
-input_name = None
+cnn = None
+svm = None
+CNN_INPUT = None
+
 try:
-    if not os.path.exists(MODEL_PATH):
-        print(f"❌ File model tidak ditemukan di: {MODEL_PATH}")
+    if not os.path.exists(CNN_PATH) or not os.path.exists(SVM_PATH):
+        print(f"❌ File model tidak ditemukan.")
     else:
-        session = ort.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
-        input_name = session.get_inputs()[0].name
-        print(f"✅ ONNX model loaded successfully from: {MODEL_PATH}")
+        cnn = ort.InferenceSession(CNN_PATH, providers=['CPUExecutionProvider'])
+        svm = ort.InferenceSession(SVM_PATH, providers=['CPUExecutionProvider'])
+        CNN_INPUT = cnn.get_inputs()[0].name
+        print(f"✅ V5 ONNX models loaded successfully.")
 except Exception as e:
     print(f"❌ Gagal memuat ONNX model: {e}")
 
+FAKE_IDX = 1
+IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+IMAGENET_STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+FFT_SIZE = 256
 
-# ============================================================
-# FACE CROPPER
-# ============================================================
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 )
 
 def crop_face(image_bgr):
-    """Finds the largest face in the image and crops it with 10% padding"""
     gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(
         gray, scaleFactor=1.1, minNeighbors=8, minSize=(80, 80)
@@ -46,91 +42,69 @@ def crop_face(image_bgr):
     if len(faces) > 0:
         x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
         pad = int(0.10 * min(w, h))
-        x1 = max(0, x - pad)
-        y1 = max(0, y - pad)
+        x1, y1 = max(0, x - pad), max(0, y - pad)
         x2 = min(image_bgr.shape[1], x + w + pad)
         y2 = min(image_bgr.shape[0], y + h + pad)
         return image_bgr[y1:y2, x1:x2]
     return image_bgr
 
-# ============================================================
-# PREPROCESSING (exact copy from training notebook Cell 27 + 37)
-# ============================================================
-def make_fft_channel(image_bgr, size=224):
-    """
-    Exact copy of training notebook's make_fft_channel.
-    Power spectrum: log1p(|F|^2), normalized to [0,1].
-    """
-    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
-    gray = cv2.resize(gray, (size, size)).astype(np.float32)
-    f = np.fft.fft2(gray)
-    f_shift = np.fft.fftshift(f)
-    ps = np.log1p(np.abs(f_shift) ** 2)
+def _azimuthal(spec):
+    h, w = spec.shape
+    cy, cx = h // 2, w // 2
+    Y, X = np.ogrid[:h, :w]
+    r = np.sqrt((X - cx) ** 2 + (Y - cy) ** 2).astype(int)
+    return ndimage.mean(spec, labels=r, index=np.arange(0, min(cy, cx)))
+
+def extract_features(img_bgr):
+    rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    r = cv2.resize(rgb, (224, 224), interpolation=cv2.INTER_LINEAR)
+    norm = (r.astype(np.float32) / 255.0 - IMAGENET_MEAN) / IMAGENET_STD
+    t3 = norm.transpose(2, 0, 1)
+
+    gray224 = cv2.cvtColor(r, cv2.COLOR_RGB2GRAY).astype(np.float32)
+    fs0 = np.fft.fftshift(np.fft.fft2(gray224))
+    ps = np.log1p(np.abs(fs0) ** 2)
     ps = (ps - ps.min()) / (ps.max() - ps.min() + 1e-8)
-    return ps
+    fft_ch = ps.astype(np.float32)[None, :, :]
 
-def preprocess_image(face_bgr):
-    """
-    Matches training notebook's predict_image() (Cell 37):
-    1. RGB 224x224 -> ImageNet normalize -> numpy array
-    2. FFT power spectrum channel
-    3. Concatenate to 4 channels
-    """
-    # --- RGB channels ---
-    face_rgb = cv2.cvtColor(face_bgr, cv2.COLOR_BGR2RGB)
-    img_input = cv2.resize(face_rgb, (224, 224)).astype(np.float32) / 255.0
+    x = np.concatenate([t3, fft_ch], axis=0)[None, :].astype(np.float32)
+    cnn_feat = cnn.run(None, {CNN_INPUT: x})[0]
 
-    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-    img_normalized = (img_input - mean) / std
+    g = cv2.resize(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY),
+                   (FFT_SIZE, FFT_SIZE)).astype(np.float32)
+    fs = np.fft.fftshift(np.fft.fft2(g))
+    az = _azimuthal(np.log1p(np.abs(fs) ** 2)).astype(np.float32)
 
-    # (224,224,3) -> (3,224,224)
-    img_chw = np.transpose(img_normalized, (2, 0, 1))
+    ns = g - cv2.GaussianBlur(g, (5, 5), 1.0)
+    nfs = np.fft.fftshift(np.fft.fft2(ns))
+    nz = _azimuthal(np.log1p(np.abs(nfs) ** 2)).astype(np.float32)
 
-    # --- FFT channel ---
-    fft_ch = make_fft_channel(face_bgr, size=224)
-    fft_ch = np.expand_dims(fft_ch, axis=0)  # (1, 224, 224)
+    feat = np.concatenate([cnn_feat[0], az, nz]).astype(np.float32)[None, :]
+    return feat
 
-    # --- Combine: (4, 224, 224) -> (1, 4, 224, 224) ---
-    combined = np.concatenate([img_chw, fft_ch], axis=0)
-    combined = np.expand_dims(combined, axis=0).astype(np.float32)
-    return combined
-
-# ============================================================
-# MAIN INFERENCE SERVICE
-# ============================================================
 def run_deepfake_analysis(file_bytes):
     start_time = time.time()
-
     face_bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     if face_bgr is None:
         raise ValueError("Invalid image format")
 
-    # 1. Crop the largest face
-    cropped_face = crop_face(face_bgr)
+    cropped = crop_face(face_bgr)
+    feat = extract_features(cropped)
 
-    # 2. Preprocess (matching training notebook exactly)
-    input_array = preprocess_image(cropped_face)
+    label, proba = svm.run(["label", "probabilities"], {"float_input": feat})
+    proba = np.asarray(proba)[0]
 
-    # 3. Inference
-    logit = float(session.run(None, {input_name: input_array})[0][0])
-    prob_fake = 1.0 / (1.0 + np.exp(-max(-50, min(50, logit))))
-
-    prob_real = 1.0 - prob_fake
+    prob_fake = float(proba[FAKE_IDX])
+    prob_real = float(proba[1 - FAKE_IDX])
     fake_percent = round(prob_fake * 100, 1)
     real_percent = round(prob_real * 100, 1)
 
-    # Training notebook: prob >= 0.5 = FAKE, prob < 0.5 = REAL
     if prob_fake >= 0.5:
-        final_result = "Deepfake"
-        confidence = fake_percent
+        final_result, confidence = "Deepfake", fake_percent
     else:
-        final_result = "Real"
-        confidence = real_percent
+        final_result, confidence = "Real", real_percent
 
-    # Print logit persis seperti kode lamamu untuk debugging di terminal
-    print(f"Logit: {logit:.4f} | P(fake): {fake_percent}% | Result: {final_result} ({confidence}%)")
-
+    print(f"P(fake): {fake_percent}% | Result: {final_result} ({confidence}%)")
     processing_time = round(time.time() - start_time, 2)
 
     return {
