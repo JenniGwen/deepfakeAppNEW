@@ -31,6 +31,16 @@ def handle_preflight():
         return res, 200
 
 # --- PUBLIC ROUTES ---
+@app.route('/', methods=['GET'])
+def health_check():
+    import jsonify
+    from flask import jsonify
+    return jsonify({
+        "status": "online",
+        "message": "SynthScan Neural Engine is awake and ready (Modular)!",
+        "version": "3.1"
+    }), 200
+
 app.add_url_rule('/api/test-db', view_func=test_connection, methods=['GET'])
 app.add_url_rule('/api/register', view_func=register, methods=['POST'])
 app.add_url_rule('/api/login', view_func=login, methods=['POST'])

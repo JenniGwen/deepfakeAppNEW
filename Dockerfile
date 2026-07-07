@@ -9,4 +9,6 @@ COPY . .
 
 EXPOSE 7860
 
-CMD ["python", "app.py"]
+# Setting PYTHONPATH so python can find the BackEnd modules
+ENV PYTHONPATH=/app/BackEnd
+CMD ["python", "BackEnd/run.py"]
