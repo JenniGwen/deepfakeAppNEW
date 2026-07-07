@@ -19,7 +19,8 @@ def scan_image(current_user):
         return error_response(message="No selected file", status_code=400)
 
     try:
-        file_bytes = np.frombuffer(file.read(), np.uint8)
+        raw_bytes = file.read()
+        file_bytes = np.frombuffer(raw_bytes, np.uint8)
 
         analysis_result = run_deepfake_analysis(file_bytes)
 
@@ -29,7 +30,9 @@ def scan_image(current_user):
                 file_name=file.filename,
                 result=analysis_result["result"],
                 confidence_score=analysis_result["probability"],
-                processing_time=analysis_result["processing_time"]
+                processing_time=analysis_result["processing_time"],
+                raw_bytes=raw_bytes,
+                content_type=file.content_type
             )
             analysis_result["saved_to_history"] = True
         else:

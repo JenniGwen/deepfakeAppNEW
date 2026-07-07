@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 import time
+import uuid
+import mimetypes
 from scipy import ndimage
 from core.db_connector import get_db
 
@@ -118,12 +120,32 @@ def run_deepfake_analysis(file_bytes):
 # ============================================================
 # DATABASE INSERTION SERVICE
 # ============================================================
-def save_scan_history(user_id, file_name, result, confidence_score, processing_time):
+def save_scan_history(user_id, file_name, result, confidence_score, processing_time, raw_bytes=None, content_type=None):
     db = get_db()
+    
+    url_file = f"/uploads/{file_name}"
+    
+    if raw_bytes:
+        try:
+            ext = os.path.splitext(file_name)[1]
+            if not ext and content_type:
+                ext = mimetypes.guess_extension(content_type) or ""
+            unique_filename = f"{user_id}/{uuid.uuid4().hex}{ext}"
+            
+            db.storage.from_("scans").upload(
+                file=raw_bytes,
+                path=unique_filename,
+                file_options={"content-type": content_type} if content_type else None
+            )
+            
+            url_file = db.storage.from_("scans").get_public_url(unique_filename)
+        except Exception as e:
+            print(f"Failed to upload to Supabase Storage: {e}")
+
     data = {
         "user_id": user_id,
         "file_name": file_name,
-        "url_file": f"/uploads/{file_name}",
+        "url_file": url_file,
         "result": result,
         "confidence_score": confidence_score,
         "processing_time": processing_time
