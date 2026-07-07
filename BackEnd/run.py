@@ -33,7 +33,6 @@ def handle_preflight():
 # --- PUBLIC ROUTES ---
 @app.route('/', methods=['GET'])
 def health_check():
-    import jsonify
     from flask import jsonify
     return jsonify({
         "status": "online",
